@@ -1,6 +1,9 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Register a new user
 const registerUser = async (req, res) => {
@@ -37,6 +40,53 @@ const registerUser = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Google OAuth login
+const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ message: 'Google credential is required' });
+    }
+
+    // Verify the Google token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { name, email, picture } = payload;
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      user = await User.create({
+        name,
+        email,
+        password: 'google-oauth-user', // Placeholder password for Google users
+        isAdmin: false,
+      });
+    }
+
+    // Generate JWT token
+    const token = generateToken(user._id);
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      token,
+    });
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({ message: 'Google authentication failed', error: error.message });
   }
 };
 
@@ -120,34 +170,25 @@ const updateUserAdminStatus = async (req, res) => {
     const { id } = req.params;
     const { isAdmin } = req.body;
 
-    // Validate input
-    if (typeof isAdmin !== 'boolean') {
-      return res.status(400).json({ message: 'isAdmin must be a boolean value' });
+    // Prevent admin from changing their own status
+    if (req.user._id.toString() === id) {
+      return res.status(400).json({ message: 'Cannot change your own admin status' });
     }
 
-    // Prevent admin from changing their own admin status
-    if (id === req.user._id.toString()) {
-      return res.status(403).json({ message: 'Cannot change your own admin status' });
-    }
-
-    // Find and update the user
     const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     user.isAdmin = isAdmin;
-    const updatedUser = await user.save();
+    await user.save();
 
-    res.json({
-      message: `User admin status updated successfully`,
-      user: {
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        isAdmin: updatedUser.isAdmin,
-      }
-    });
+    res.json({ message: 'Admin status updated successfully', user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    }});
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -155,13 +196,14 @@ const updateUserAdminStatus = async (req, res) => {
 
 // Generate JWT token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'fallbacksecret', {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '30d',
   });
 };
 
 module.exports = {
   registerUser,
+  googleLogin,
   loginUser,
   getUserProfile,
   updateUserProfile,

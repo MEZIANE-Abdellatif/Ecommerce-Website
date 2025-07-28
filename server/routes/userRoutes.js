@@ -1,22 +1,25 @@
 const express = require('express');
-const { registerUser, loginUser, getUserProfile, updateUserProfile, updateUserAdminStatus } = require('../controllers/userController');
+const router = express.Router();
+const {
+  registerUser,
+  loginUser,
+  googleLogin,
+  getUserProfile,
+  updateUserProfile,
+  updateUserAdminStatus,
+} = require('../controllers/userController');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 
-const router = express.Router();
-
-// Register a new user
+// Public routes
 router.post('/register', registerUser);
-
-// Login user
 router.post('/login', loginUser);
+router.post('/google-login', googleLogin);
 
-// Get user profile (protected)
+// Protected routes
 router.get('/profile', protect, getUserProfile);
-
-// Update user profile (protected)
 router.put('/profile', protect, updateUserProfile);
 
-// Update user admin status (admin only)
+// Admin only routes
 router.put('/:id/admin', protect, isAdmin, updateUserAdminStatus);
 
 module.exports = router; 

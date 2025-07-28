@@ -5,6 +5,13 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Success from "./pages/Success";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import PaymentMethod from "./pages/PaymentMethod";
+import MyOrders from "./pages/MyOrders";
+import OrderDetails from "./pages/OrderDetails";
 import Navbar from "./components/Navbar";
 import './App.css'
 
@@ -19,6 +26,13 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/payment-method" element={<PaymentMethod />} />
+        <Route path="/my-orders" element={<MyOrders />} />
+        <Route path="/orders/:id" element={<OrderDetails />} />
       </Routes>
     </Router>
   );
