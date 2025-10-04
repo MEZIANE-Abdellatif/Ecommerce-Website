@@ -94,6 +94,7 @@ export default function EditProfile() {
         name: response.data.name,
         email: response.data.email,
         isAdmin: response.data.isAdmin,
+        isSuperAdmin: response.data.isSuperAdmin,
       };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 

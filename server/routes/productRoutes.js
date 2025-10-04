@@ -1,5 +1,5 @@
  const express = require('express');
-const { getAllProducts, getProductById, createProduct, deleteProduct } = require('../controllers/productController');
+const { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct } = require('../controllers/productController');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.get('/', getAllProducts);
 
 // GET /api/products/:id - Define this last to avoid conflicts
 router.get('/:id', getProductById);
+
+// PUT /api/products/:id (admin only) - Update product
+router.put('/:id', protect, isAdmin, updateProduct);
 
 // DELETE /api/products/:id (admin only)
 router.delete('/:id', protect, isAdmin, deleteProduct);
