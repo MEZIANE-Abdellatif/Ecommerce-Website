@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CartContext } from "./CartContextDef";
+import { parsePrice } from "../utils/priceUtils";
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState(() => {
@@ -13,22 +14,30 @@ export function CartProvider({ children }) {
 
   const addToCart = (product) => {
     setCart((prev) => {
-      const existingItem = prev.find((item) => item.id === product.id);
+      const productId = product._id || product.id;
+      const existingItem = prev.find((item) => (item._id || item.id) === productId);
       if (existingItem) {
         // If item exists, increase quantity
         return prev.map((item) =>
-          item.id === product.id
+          (item._id || item.id) === productId
             ? { ...item, quantity: (item.quantity || 1) + 1 }
             : item
         );
       }
-      // If item doesn't exist, add with quantity 1
-      return [...prev, { ...product, quantity: 1 }];
+      // If item doesn't exist, add with the quantity from the product or default to 1
+      const cartItem = {
+        ...product,
+        id: productId, // Ensure we have both id and _id for compatibility
+        _id: productId,
+        image: product.images?.[0] || product.image || "https://via.placeholder.com/300x200",
+        quantity: product.quantity || 1
+      };
+      return [...prev, cartItem];
     });
   };
 
   const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+    setCart((prev) => prev.filter((item) => (item._id || item.id) !== id));
   };
 
   const updateQuantity = (id, quantity) => {
@@ -38,7 +47,7 @@ export function CartProvider({ children }) {
     }
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, quantity } : item
+        (item._id || item.id) === id ? { ...item, quantity } : item
       )
     );
   };
@@ -46,7 +55,7 @@ export function CartProvider({ children }) {
   const increaseQuantity = (id) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id
+        (item._id || item.id) === id
           ? { ...item, quantity: (item.quantity || 1) + 1 }
           : item
       )
@@ -56,7 +65,7 @@ export function CartProvider({ children }) {
   const decreaseQuantity = (id) => {
     setCart((prev) =>
       prev.map((item) => {
-        if (item.id === id) {
+        if ((item._id || item.id) === id) {
           const newQuantity = (item.quantity || 1) - 1;
           return newQuantity <= 0 ? null : { ...item, quantity: newQuantity };
         }
@@ -72,7 +81,7 @@ export function CartProvider({ children }) {
 
   const getCartTotal = () => {
     return cart.reduce((total, item) => {
-      const price = parseFloat(item.price.replace(/[^\d.]/g, ""));
+      const price = parsePrice(item.price);
       const quantity = item.quantity || 1;
       return total + (isNaN(price) ? 0 : price * quantity);
     }, 0);

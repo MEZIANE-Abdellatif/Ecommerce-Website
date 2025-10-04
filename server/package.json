@@ -1,18 +1,44 @@
 {
+  "name": "e-commerce-server",
+  "version": "1.0.0",
+  "description": "Secure e-commerce backend API",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "create-superadmin": "node scripts/createSuperAdmin.js",
+    "create-test-users": "node scripts/createTestUsers.js",
+    "create-sample-slides": "node scripts/createSampleSlides.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "e-commerce",
+    "api",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
     "nodemon": "^3.1.10"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
     "google-auth-library": "^10.2.0",
+    "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.16.4"
+    "mongoose": "^8.16.4",
+    "morgan": "^1.10.0",
+    "nodemailer": "^7.0.5"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

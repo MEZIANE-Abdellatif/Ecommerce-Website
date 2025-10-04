@@ -20,30 +20,30 @@ export default function MyOrders() {
         return;
       }
 
-      const response = await axios.get("http://localhost:5000/api/orders/myorders", {
+      const response = await fetch("http://localhost:5000/api/orders/myorders", {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
       });
 
-      setOrders(response.data);
+      if (response.ok) {
+        const ordersData = await response.json();
+        // Transform backend data to match frontend format
+        const transformedOrders = ordersData.map(order => ({
+          id: order._id,
+          date: new Date(order.createdAt).toLocaleDateString(),
+          status: order.isDelivered ? "Delivered" : order.isPaid ? "Processing" : "Pending",
+          total: order.totalPrice,
+          items: order.orderItems.length
+        }));
+        setOrders(transformedOrders);
+      } else {
+        setError("Failed to load orders. Please try again.");
+      }
     } catch (error) {
       console.error("Error fetching orders:", error);
-      
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        navigate("/login");
-        return;
-      }
-      
-      if (error.response?.status === 404) {
-        setError("Orders endpoint not found. Please check the server.");
-      } else if (error.response?.status === 500) {
-        setError("Server error. Please try again later.");
-      } else {
-        setError(`Failed to load orders: ${error.response?.data?.message || error.message}`);
-      }
+      setError("Failed to load orders. Please try again.");
     } finally {
       setLoading(false);
     }

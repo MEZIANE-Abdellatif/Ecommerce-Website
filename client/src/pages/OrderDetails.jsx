@@ -21,21 +21,47 @@ export default function OrderDetails() {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5000/api/orders/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/orders/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
       });
 
-      setOrder(response.data);
+      if (response.ok) {
+        const orderData = await response.json();
+        // Transform backend data to match frontend format
+        const transformedOrder = {
+          id: orderData._id,
+          date: new Date(orderData.createdAt).toLocaleDateString(),
+          status: orderData.isDelivered ? "Delivered" : orderData.isPaid ? "Processing" : "Pending",
+          total: orderData.totalPrice,
+          items: orderData.orderItems.length,
+          orderItems: orderData.orderItems.map(item => ({
+            product: {
+              name: item.name,
+              image: item.image,
+              price: item.price
+            },
+            quantity: item.qty
+          })),
+          shippingAddress: {
+            street: orderData.shippingAddress.address,
+            city: orderData.shippingAddress.city,
+            state: orderData.shippingAddress.postalCode,
+            zipCode: orderData.shippingAddress.postalCode,
+            country: orderData.shippingAddress.country
+          },
+          paymentMethod: orderData.paymentMethod
+        };
+        setOrder(transformedOrder);
+      } else if (response.status === 404) {
+        setError("Order not found.");
+      } else {
+        setError("Failed to load order details. Please try again.");
+      }
     } catch (error) {
       console.error("Error fetching order details:", error);
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        navigate("/login");
-        return;
-      }
       setError("Failed to load order details. Please try again.");
     } finally {
       setLoading(false);
