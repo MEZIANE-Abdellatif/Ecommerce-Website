@@ -146,3 +146,5 @@ data/
 # Docker
 .dockerignore
 docker-compose.override.yml 
+# Vite cache
+.vite/
