@@ -62,7 +62,7 @@ export default function Profile() {
     try {
       const token = localStorage.getItem("token");
       if (token) {
-        const response = await fetch("http://localhost:5000/api/orders/myorders", {
+        const response = await fetch("https://ecommerce-website-iwrz.onrender.com/api/orders/myorders", {
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"

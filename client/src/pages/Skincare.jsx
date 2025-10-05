@@ -21,7 +21,7 @@ const Skincare = () => {
       }
       
       console.log('Fetching with params:', params.toString()); // Debug log
-      const response = await fetch(`http://localhost:5000/api/products?${params.toString()}`);
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/products?${params.toString()}`);
       const data = await response.json();
       console.log('Received products:', data.length); // Debug log
       setProducts(data);

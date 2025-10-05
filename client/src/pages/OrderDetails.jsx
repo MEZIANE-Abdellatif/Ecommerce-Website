@@ -21,7 +21,7 @@ export default function OrderDetails() {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/orders/${id}`, {
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/orders/${id}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"

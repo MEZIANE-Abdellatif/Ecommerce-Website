@@ -36,7 +36,7 @@ export default function Login() {
     setError("");
     setNeedsVerification(false);
     try {
-      const response = await axios.post("http://localhost:5000/api/users/login", formData);
+      const response = await axios.post("https://ecommerce-website-iwrz.onrender.com/api/users/login", formData);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       navigate("/profile");
@@ -67,7 +67,7 @@ export default function Login() {
     setError("");
 
     try {
-      await axios.post("http://localhost:5000/api/users/resend-verification", {
+      await axios.post("https://ecommerce-website-iwrz.onrender.com/api/users/resend-verification", {
         email: formData.email
       });
       setResendSuccess("Verification email sent successfully! Please check your inbox.");

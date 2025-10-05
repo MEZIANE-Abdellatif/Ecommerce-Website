@@ -16,7 +16,7 @@ const Makeup = () => {
         params.append('skinPart', selectedSkinPart);
       }
       
-      const response = await fetch(`http://localhost:5000/api/products?${params.toString()}`);
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/products?${params.toString()}`);
       const data = await response.json();
       setProducts(data);
       setLoading(false);

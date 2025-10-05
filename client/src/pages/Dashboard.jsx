@@ -22,7 +22,7 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -99,7 +99,7 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/products', {
+      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/products', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -133,7 +133,7 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/orders', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -170,7 +170,7 @@ const Dashboard = () => {
       }
 
       console.log('fetchUsers - Making API call to /api/users');
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -566,7 +566,7 @@ const ProductsSection = ({ products }) => {
       
       console.log('Sending product data:', productData);
       
-      const response = await fetch('http://localhost:5000/api/products', {
+      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/products', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -596,7 +596,7 @@ const ProductsSection = ({ products }) => {
   // Carousel management functions
   const fetchCarouselSlides = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/carousel/slides');
+      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/carousel/slides');
       if (response.ok) {
         const slides = await response.json();
         setCarouselSlides(slides);
@@ -618,7 +618,7 @@ const ProductsSection = ({ products }) => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/carousel/slides', {
+      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/carousel/slides', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -654,7 +654,7 @@ const ProductsSection = ({ products }) => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/carousel/slides/${slideId}`, {
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/carousel/slides/${slideId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -691,7 +691,7 @@ const ProductsSection = ({ products }) => {
       
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/carousel/slides/${editingSlide._id}`, {
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/carousel/slides/${editingSlide._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -751,7 +751,7 @@ const ProductsSection = ({ products }) => {
       
       console.log('Updating product data:', productData);
       
-      const response = await fetch(`http://localhost:5000/api/products/${editingProduct._id}`, {
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/products/${editingProduct._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1512,7 +1512,7 @@ const UsersSection = ({ users }) => {
       const isAdmin = newRole === 'admin' || newRole === 'superadmin';
       const isSuperAdmin = newRole === 'superadmin';
       
-      const response = await fetch(`http://localhost:5000/api/users/${selectedUser._id}/role`, {
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/users/${selectedUser._id}/role`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

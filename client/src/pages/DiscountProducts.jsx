@@ -14,7 +14,7 @@ export default function DiscountProducts() {
   useEffect(() => {
     const fetchDiscountProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/products");
+        const response = await axios.get("https://ecommerce-website-iwrz.onrender.com/api/products");
         // Create discount products with smart discount logic
         const discountProducts = response.data.map(product => {
           const originalPrice = product.price * (1.2 + Math.random() * 0.8); // 20-100% markup
