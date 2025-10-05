@@ -59,7 +59,7 @@ export default function ProductDetails() {
   // Fetch related products from the same category
   const fetchRelatedProducts = async (category, currentProductId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/products?category=${category}`);
+      const response = await axios.get(`https://ecommerce-website-iwrz.onrender.com/api/products?category=${category}`);
       
       // Filter out the current product and limit to 4 related products
       const filtered = response.data
@@ -79,7 +79,7 @@ export default function ProductDetails() {
     
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const response = await axios.get(`https://ecommerce-website-iwrz.onrender.com/api/products/${id}`);
         const productData = response.data;
         setProduct(productData);
         

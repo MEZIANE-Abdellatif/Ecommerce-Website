@@ -26,7 +26,7 @@ export default function EditProfile() {
         return;
       }
 
-      const response = await axios.get("http://localhost:5000/api/users/profile", {
+      const response = await axios.get("https://ecommerce-website-iwrz.onrender.com/api/users/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -79,7 +79,7 @@ export default function EditProfile() {
       };
 
       const response = await axios.put(
-        "http://localhost:5000/api/users/profile",
+        "https://ecommerce-website-iwrz.onrender.com/api/users/profile",
         updateData,
         {
           headers: {

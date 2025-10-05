@@ -16,7 +16,7 @@ export default function BestSellers() {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/products");
+        const response = await axios.get("https://ecommerce-website-iwrz.onrender.com/api/products");
         // Simulate best sellers by adding sales data and filtering
         const bestSellerProducts = response.data.map(product => ({
           ...product,

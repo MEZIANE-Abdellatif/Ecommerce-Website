@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
 
@@ -11,9 +11,9 @@ const Fragrance = () => {
 
   useEffect(() => {
     fetchFragranceProducts();
-  }, [selectedFragranceFamily, selectedConcentration]);
+  }, [selectedFragranceFamily, selectedConcentration, fetchFragranceProducts]);
 
-  const fetchFragranceProducts = async () => {
+  const fetchFragranceProducts = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       params.append('category', 'fragrance');
@@ -24,7 +24,7 @@ const Fragrance = () => {
         params.append('concentration', selectedConcentration);
       }
       
-      const response = await fetch(`http://localhost:5000/api/products?${params.toString()}`);
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/products?${params.toString()}`);
       const data = await response.json();
       setProducts(data);
       setLoading(false);
@@ -32,7 +32,7 @@ const Fragrance = () => {
       console.error('Error fetching fragrance products:', error);
       setLoading(false);
     }
-  };
+  }, [selectedFragranceFamily, selectedConcentration]);
 
   const fragranceFamilies = [
     { id: 'all', label: 'All Families', icon: '✨', color: 'from-pink-400 to-purple-500', description: 'Complete collection' },

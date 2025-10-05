@@ -74,7 +74,7 @@ export default function Register() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/users/register", {
+      await axios.post("https://ecommerce-website-iwrz.onrender.com/api/users/register", {
         name: formData.name,
         email: formData.email,
         password: formData.password,

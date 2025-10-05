@@ -41,7 +41,7 @@ const createTransporter = () => {
 // Send verification email
 const sendVerificationEmail = async (email, name, verificationToken) => {
   const transporter = createTransporter();
-  const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5175'}/verify-email?token=${verificationToken}`;
+  const verificationUrl = `${process.env.CLIENT_URL || 'https://ecommerce-website-topaz-sigma.vercel.app'}/verify-email?token=${verificationToken}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER || 'noreply@mazzinka.com',

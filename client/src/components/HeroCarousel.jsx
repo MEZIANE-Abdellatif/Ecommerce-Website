@@ -13,7 +13,7 @@ const HeroCarousel = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/carousel/slides');
+        const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/carousel/slides');
         if (response.ok) {
           const data = await response.json();
           // Filter only active slides and sort by order

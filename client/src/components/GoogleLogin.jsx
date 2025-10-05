@@ -13,7 +13,7 @@ export default function GoogleLoginButton({ onSuccess, onError }) {
     setIsLoading(true);
     try {
       // Send the Google token to your backend
-      const response = await axios.post('http://localhost:5000/api/users/google-login', {
+      const response = await axios.post('https://ecommerce-website-iwrz.onrender.com/api/users/google-login', {
         credential: credentialResponse.credential,
       });
 

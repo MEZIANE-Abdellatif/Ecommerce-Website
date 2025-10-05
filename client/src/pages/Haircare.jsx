@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
 
@@ -11,9 +11,9 @@ const Haircare = () => {
 
   useEffect(() => {
     fetchHaircareProducts();
-  }, [selectedHairType, selectedProductType]);
+  }, [selectedHairType, selectedProductType, fetchHaircareProducts]);
 
-  const fetchHaircareProducts = async () => {
+  const fetchHaircareProducts = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       params.append('category', 'haircare');
@@ -24,7 +24,7 @@ const Haircare = () => {
         params.append('productType', selectedProductType);
       }
       
-      const response = await fetch(`http://localhost:5000/api/products?${params.toString()}`);
+      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/products?${params.toString()}`);
       const data = await response.json();
       setProducts(data);
       setLoading(false);
@@ -32,7 +32,7 @@ const Haircare = () => {
       console.error('Error fetching haircare products:', error);
       setLoading(false);
     }
-  };
+  }, [selectedHairType, selectedProductType]);
 
 
   const hairTypes = [

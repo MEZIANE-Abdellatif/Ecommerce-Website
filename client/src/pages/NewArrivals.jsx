@@ -13,7 +13,7 @@ const NewArrivals = () => {
 
   const fetchNewArrivalsProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products?sort=newest');
+      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/products?sort=newest');
       const data = await response.json();
       setProducts(data);
       setLoading(false);
