@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { Link } from "react-router-dom";
 import FavoriteButton from "../components/FavoriteButton";
 import axios from "axios";
@@ -14,7 +15,7 @@ export default function DiscountProducts() {
   useEffect(() => {
     const fetchDiscountProducts = async () => {
       try {
-        const response = await axios.get("https://ecommerce-website-iwrz.onrender.com/api/products");
+        const response = await axios.get(API_ENDPOINTS.PRODUCTS);
         // Create discount products with smart discount logic
         const discountProducts = response.data.map(product => {
           const originalPrice = product.price * (1.2 + Math.random() * 0.8); // 20-100% markup

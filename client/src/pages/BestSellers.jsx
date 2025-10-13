@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import FavoriteButton from "../components/FavoriteButton";
@@ -16,7 +17,7 @@ export default function BestSellers() {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        const response = await axios.get("https://ecommerce-website-iwrz.onrender.com/api/products");
+        const response = await axios.get(API_ENDPOINTS.PRODUCTS);
         // Simulate best sellers by adding sales data and filtering
         const bestSellerProducts = response.data.map(product => ({
           ...product,

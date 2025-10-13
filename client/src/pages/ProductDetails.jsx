@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import FavoriteButton from "../components/FavoriteButton";
@@ -59,7 +60,7 @@ export default function ProductDetails() {
   // Fetch related products from the same category
   const fetchRelatedProducts = async (category, currentProductId) => {
     try {
-      const response = await axios.get(`https://ecommerce-website-iwrz.onrender.com/api/products?category=${category}`);
+      const response = await axios.get(API_ENDPOINTS.PRODUCTS_BY_CATEGORY(category));
       
       // Filter out the current product and limit to 4 related products
       const filtered = response.data
@@ -79,7 +80,7 @@ export default function ProductDetails() {
     
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`https://ecommerce-website-iwrz.onrender.com/api/products/${id}`);
+        const response = await axios.get(API_ENDPOINTS.PRODUCT_BY_ID(id));
         const productData = response.data;
         setProduct(productData);
         

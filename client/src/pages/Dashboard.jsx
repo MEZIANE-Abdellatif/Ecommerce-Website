@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 import { useNavigate } from 'react-router-dom';
 import ImageUpload from '../components/ImageUpload';
 import CarouselImageUpload from '../components/CarouselImageUpload';
@@ -22,7 +23,7 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/users/profile', {
+      const response = await fetch(API_ENDPOINTS.PROFILE, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -99,7 +100,7 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/products', {
+      const response = await fetch(API_ENDPOINTS.PRODUCTS, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -133,7 +134,7 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/orders', {
+      const response = await fetch(API_ENDPOINTS.ORDERS, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -170,7 +171,7 @@ const Dashboard = () => {
       }
 
       console.log('fetchUsers - Making API call to /api/users');
-      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/users', {
+      const response = await fetch(API_ENDPOINTS.USERS, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -566,7 +567,7 @@ const ProductsSection = ({ products }) => {
       
       console.log('Sending product data:', productData);
       
-      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/products', {
+      const response = await fetch(API_ENDPOINTS.PRODUCTS, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -596,7 +597,7 @@ const ProductsSection = ({ products }) => {
   // Carousel management functions
   const fetchCarouselSlides = async () => {
     try {
-      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/carousel/slides');
+      const response = await fetch(API_ENDPOINTS.CAROUSEL_SLIDES);
       if (response.ok) {
         const slides = await response.json();
         setCarouselSlides(slides);
@@ -618,7 +619,7 @@ const ProductsSection = ({ products }) => {
         return;
       }
 
-      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/carousel/slides', {
+      const response = await fetch(API_ENDPOINTS.CAROUSEL_SLIDES, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -654,7 +655,7 @@ const ProductsSection = ({ products }) => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/carousel/slides/${slideId}`, {
+      const response = await fetch(API_ENDPOINTS.CAROUSEL_SLIDE_BY_ID(slideId), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -691,7 +692,7 @@ const ProductsSection = ({ products }) => {
       
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/carousel/slides/${editingSlide._id}`, {
+      const response = await fetch(API_ENDPOINTS.CAROUSEL_SLIDE_BY_ID(editingSlide._id), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -751,7 +752,7 @@ const ProductsSection = ({ products }) => {
       
       console.log('Updating product data:', productData);
       
-      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/products/${editingProduct._id}`, {
+      const response = await fetch(API_ENDPOINTS.PRODUCT_BY_ID(editingProduct._id), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1512,7 +1513,7 @@ const UsersSection = ({ users }) => {
       const isAdmin = newRole === 'admin' || newRole === 'superadmin';
       const isSuperAdmin = newRole === 'superadmin';
       
-      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/users/${selectedUser._id}/role`, {
+      const response = await fetch(API_ENDPOINTS.USER_ROLE(selectedUser._id), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

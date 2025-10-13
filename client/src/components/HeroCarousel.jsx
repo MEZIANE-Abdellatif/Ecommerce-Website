@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -13,7 +14,7 @@ const HeroCarousel = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/carousel/slides');
+        const response = await fetch(API_ENDPOINTS.CAROUSEL_SLIDES);
         if (response.ok) {
           const data = await response.json();
           // Filter only active slides and sort by order

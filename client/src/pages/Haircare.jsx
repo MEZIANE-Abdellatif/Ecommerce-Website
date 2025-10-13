@@ -24,7 +24,7 @@ const Haircare = () => {
         params.append('productType', selectedProductType);
       }
       
-      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/products?${params.toString()}`);
+      const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`);
       const data = await response.json();
       setProducts(data);
       setLoading(false);

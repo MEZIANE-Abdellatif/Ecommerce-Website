@@ -29,7 +29,7 @@ export default function VerifyEmail() {
 
       console.log("🔍 Attempting to verify email with token length:", token.length);
       
-      await axios.get(`https://ecommerce-website-iwrz.onrender.com/api/users/verify-email?token=${token}`);
+      await axios.get(`${API_ENDPOINTS.VERIFY_EMAIL}?token=${token}`);
       
       setSuccess(true);
       setError("");

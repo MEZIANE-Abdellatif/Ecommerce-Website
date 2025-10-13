@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import GoogleLoginButton from "../components/GoogleLogin";
@@ -74,7 +75,7 @@ export default function Register() {
     }
 
     try {
-      await axios.post("https://ecommerce-website-iwrz.onrender.com/api/users/register", {
+      await axios.post(API_ENDPOINTS.REGISTER, {
         name: formData.name,
         email: formData.email,
         password: formData.password,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 
@@ -102,7 +103,7 @@ export default function Checkout() {
         shippingCost: shippingCost
       };
 
-      const response = await fetch("https://ecommerce-website-iwrz.onrender.com/api/orders", {
+      const response = await fetch(API_ENDPOINTS.ORDERS, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

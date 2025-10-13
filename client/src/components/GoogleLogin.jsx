@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -13,7 +14,7 @@ export default function GoogleLoginButton({ onSuccess, onError }) {
     setIsLoading(true);
     try {
       // Send the Google token to your backend
-      const response = await axios.post('https://ecommerce-website-iwrz.onrender.com/api/users/google-login', {
+      const response = await axios.post(API_ENDPOINTS.GOOGLE_LOGIN, {
         credential: credentialResponse.credential,
       });
 

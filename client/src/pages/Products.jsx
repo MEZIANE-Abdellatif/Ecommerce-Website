@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { Link, useLocation } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import FavoriteButton from "../components/FavoriteButton";
@@ -17,7 +18,7 @@ export default function Products() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("https://ecommerce-website-iwrz.onrender.com/api/products");
+        const response = await axios.get(API_ENDPOINTS.PRODUCTS);
         setProducts(response.data);
       } catch (err) {
         console.error("Error fetching products:", err);

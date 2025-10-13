@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import axios from "axios";
@@ -131,7 +132,7 @@ export default function PaymentMethod() {
 
       // Create order via API
       await axios.post(
-        "https://ecommerce-website-iwrz.onrender.com/api/orders",
+        API_ENDPOINTS.ORDERS,
         orderData,
         {
           headers: {

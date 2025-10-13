@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -21,7 +22,7 @@ export default function OrderDetails() {
         return;
       }
 
-      const response = await fetch(`https://ecommerce-website-iwrz.onrender.com/api/orders/${id}`, {
+      const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(id), {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"

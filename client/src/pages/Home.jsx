@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 import { Link } from 'react-router-dom';
 import HeroCarousel from '../components/HeroCarousel';
 import FavoriteButton from '../components/FavoriteButton';
@@ -25,7 +26,7 @@ const Home = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('https://ecommerce-website-iwrz.onrender.com/api/products');
+      const response = await fetch(API_ENDPOINTS.PRODUCTS);
       const data = await response.json();
       setProducts(data);
       setLoading(false);

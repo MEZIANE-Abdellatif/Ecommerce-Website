@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { useNavigate } from "react-router-dom";
 
 // Consistent tab wrapper for uniform width behavior across all tabs
@@ -62,7 +63,7 @@ export default function Profile() {
     try {
       const token = localStorage.getItem("token");
       if (token) {
-        const response = await fetch("https://ecommerce-website-iwrz.onrender.com/api/orders/myorders", {
+        const response = await fetch(API_ENDPOINTS.MY_ORDERS, {
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"

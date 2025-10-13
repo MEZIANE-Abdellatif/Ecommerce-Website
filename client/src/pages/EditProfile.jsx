@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -26,7 +27,7 @@ export default function EditProfile() {
         return;
       }
 
-      const response = await axios.get("https://ecommerce-website-iwrz.onrender.com/api/users/profile", {
+      const response = await axios.get(API_ENDPOINTS.PROFILE, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -79,7 +80,7 @@ export default function EditProfile() {
       };
 
       const response = await axios.put(
-        "https://ecommerce-website-iwrz.onrender.com/api/users/profile",
+        API_ENDPOINTS.PROFILE,
         updateData,
         {
           headers: {

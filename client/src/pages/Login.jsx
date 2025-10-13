@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import GoogleLoginButton from "../components/GoogleLogin";
@@ -36,7 +37,7 @@ export default function Login() {
     setError("");
     setNeedsVerification(false);
     try {
-      const response = await axios.post("https://ecommerce-website-iwrz.onrender.com/api/users/login", formData);
+      const response = await axios.post(API_ENDPOINTS.LOGIN, formData);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       navigate("/profile");
@@ -67,7 +68,7 @@ export default function Login() {
     setError("");
 
     try {
-      await axios.post("https://ecommerce-website-iwrz.onrender.com/api/users/resend-verification", {
+      await axios.post(API_ENDPOINTS.RESEND_VERIFICATION, {
         email: formData.email
       });
       setResendSuccess("Verification email sent successfully! Please check your inbox.");
