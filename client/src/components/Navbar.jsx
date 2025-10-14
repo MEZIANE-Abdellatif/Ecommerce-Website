@@ -132,7 +132,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16 min-w-0">
           {/* Logo */}
           <div className="flex-shrink-0 min-w-0 max-w-[120px] sm:max-w-none">
-            <Link to="/" className="text-sm sm:text-xl md:mr-10 font-bold text-gray-900 hover:text-pink-600 transition-all duration-300 transform hover:scale-105 block truncate">
+            <Link to="/" className="text-lg sm:text-xl md:mr-10 font-bold text-gray-900 hover:text-pink-600 transition-all duration-300 transform hover:scale-105 block truncate">
               <span className="bg-gradient-to-r from-gray-900 via-pink-600 to-gray-900 bg-clip-text text-transparent">
                 MaZzinka.pl
               </span>
@@ -298,7 +298,7 @@ export default function Navbar() {
         {isMenuOpen && (
           <>
             {/* Backdrop */}
-            <div className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={() => setIsMenuOpen(false)}></div>
+            <div className="lg:hidden fixed inset-0 bg-black/20 z-40" onClick={() => setIsMenuOpen(false)}></div>
             {/* Menu */}
             <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-2xl border-t border-gray-200 mobile-menu-container z-50">
             <div className="px-4 py-4 max-h-[calc(100vh-4rem)] overflow-y-auto">

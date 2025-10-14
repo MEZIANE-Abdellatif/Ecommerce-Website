@@ -5,6 +5,15 @@
   text-align: center;
 }
 
+/* Add minimal horizontal padding on mobile phones */
+@media (max-width: 639px) {
+  #root {
+    padding: 0 1px; /* Minimal 1px horizontal padding */
+    max-width: 100%;
+    margin: 0 auto; /* Center the content */
+  }
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

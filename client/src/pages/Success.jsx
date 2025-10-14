@@ -31,7 +31,7 @@ export default function Success() {
               Order Successful! 🎉
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
-              Thank you for choosing Mazzinka! Your order has been placed successfully and you'll receive a confirmation email shortly.
+              Thank you for testing our beta version! Your order has been placed successfully. We appreciate your support as we continue to improve Mazzinka.
             </p>
             
             {/* Order Details */}
@@ -42,19 +42,19 @@ export default function Success() {
                   <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white text-xs font-bold">1</span>
                   </div>
-                  <span className="text-gray-700">Check your email for order confirmation</span>
+                  <span className="text-gray-700">Your order has been recorded</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white text-xs font-bold">2</span>
                   </div>
-                  <span className="text-gray-700">Track your order in your profile</span>
+                  <span className="text-gray-700">View your order in your profile</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white text-xs font-bold">3</span>
                   </div>
-                  <span className="text-gray-700">Enjoy your beautiful Mazzinka products!</span>
+                  <span className="text-gray-700">Thank you for helping us test Mazzinka!</span>
                 </div>
               </div>
             </div>

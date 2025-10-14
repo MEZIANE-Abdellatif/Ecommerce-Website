@@ -61,7 +61,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Mobile-specific adjustments - Fixed breakpoint to avoid conflict with Tailwind sm: */
+/* Mobile-specific adjustments - Minimal horizontal padding for centering */
 @media (max-width: 639px) {
   html, body {
     margin: 0 !important;
@@ -70,8 +70,8 @@ html {
   
   #root {
     margin: 0 auto !important;
-    padding: 0.75rem !important;
-    max-width: calc(100% - 1.5rem) !important;
+    padding: 0 1px !important; /* Minimal 1px horizontal padding */
+    max-width: 100% !important;
   }
 }
 

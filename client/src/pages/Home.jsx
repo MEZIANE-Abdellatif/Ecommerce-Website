@@ -10,7 +10,7 @@ const Home = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [showVersionPopup, setShowVersionPopup] = useState(false);
+  const [showVersionPopup, setShowVersionPopup] = useState(true);
 
   useEffect(() => {
     fetchProducts();
@@ -622,12 +622,12 @@ const Home = () => {
 
       {/* Version Announcement Popup */}
       {showVersionPopup && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-gradient-to-br from-white via-pink-50/50 to-purple-50/50 backdrop-blur-xl rounded-3xl p-8 max-w-2xl mx-4 shadow-2xl border border-white/30 animate-slide-up">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 animate-fade-in p-4">
+          <div className="bg-gradient-to-br from-white via-pink-50/50 to-purple-50/50 backdrop-blur-xl rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/30 animate-slide-up relative">
             {/* Simple Elegant Close Button */}
             <button
               onClick={handleCloseVersionPopup}
-              className="group absolute top-4 right-4 w-10 h-10"
+              className="group absolute top-4 right-4 w-10 h-10 z-10"
             >
               {/* Main Button Container */}
               <div className="relative w-full h-full rounded-full bg-white/90 hover:bg-red-50 border border-gray-200 hover:border-red-200 shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center">
@@ -645,7 +645,7 @@ const Home = () => {
               </div>
             </button>
 
-            <div className="text-center">
+            <div className="text-center pt-8">
               {/* Version Badge */}
               <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-full mb-6 shadow-lg">
                 <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -661,13 +661,13 @@ const Home = () => {
               </h2>
               
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                You're experiencing <span className="font-bold text-blue-600">Version 0</span> of our beauty platform! 
-                We're working hard to bring you <span className="font-bold text-purple-600">Version 3</span> with amazing features.
+                You're experiencing the <span className="font-bold text-blue-600">Beta Version</span> of our beauty platform! 
+                We're continuously improving and adding <span className="font-bold text-purple-600">amazing features</span> for you.
               </p>
 
               {/* Current Features */}
               <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-pink-200/50">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">✨ What's Available Now</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4"> What's Available Now</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full flex items-center justify-center flex-shrink-0">
@@ -679,11 +679,9 @@ const Home = () => {
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
+                      <span className="text-white text-xs font-bold">⚙️</span>
                     </div>
-                    <span className="text-gray-700">Shopping cart & checkout</span>
+                    <span className="text-gray-700">Shopping cart & checkout <span className="text-xs text-gray-500">(Stripe pending)</span></span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0">
@@ -691,23 +689,21 @@ const Home = () => {
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <span className="text-gray-700">User accounts & favorites</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <span className="text-gray-700">Order tracking</span>
+                    <span className="text-gray-700">User accounts & profile</span>
                   </div>
                 </div>
               </div>
 
               {/* Coming Soon Features */}
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-purple-200/50">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">🚀 Coming in Version 3</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">🚀 Coming Soon</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-5 h-5 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-xs font-bold">📦</span>
+                    </div>
+                    <span className="text-gray-700">Order tracking</span>
+                  </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs font-bold">🎯</span>
@@ -733,12 +729,6 @@ const Home = () => {
                     <span className="text-gray-700">Community reviews & ratings</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">🎨</span>
-                    </div>
-                    <span className="text-gray-700">Virtual try-on technology</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-red-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs font-bold">🔔</span>
                     </div>
@@ -751,7 +741,7 @@ const Home = () => {
               <div className="space-y-4">
                 <p className="text-gray-600 text-sm">
                   <span className="font-medium">Stay tuned for amazing updates! </span>
-                  Follow our journey to Version 3! 🚀
+                  We're constantly improving your experience! 🚀
                 </p>
                 
                 <button
