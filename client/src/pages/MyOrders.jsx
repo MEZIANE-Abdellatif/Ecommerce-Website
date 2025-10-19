@@ -32,11 +32,15 @@ export default function MyOrders() {
         const ordersData = await response.json();
         // Transform backend data to match frontend format
         const transformedOrders = ordersData.map(order => ({
+          _id: order._id,
           id: order._id,
+          createdAt: order.createdAt,
           date: new Date(order.createdAt).toLocaleDateString(),
-          status: order.isDelivered ? "Delivered" : order.isPaid ? "Processing" : "Pending",
-          total: order.totalPrice,
-          items: order.orderItems.length
+          status: order.isDelivered ? "delivered" : order.isPaid ? "paid" : "pending",
+          totalPrice: order.totalPrice,
+          paymentMethod: order.paymentMethod,
+          items: order.orderItems.length,
+          orderItems: order.orderItems
         }));
         setOrders(transformedOrders);
       } else {
@@ -215,7 +219,10 @@ export default function MyOrders() {
                 {/* View Details Button */}
                 <div className="flex justify-end">
                   <button
-                    onClick={() => navigate(`/orders/${order._id}`)}
+                    onClick={() => {
+                      console.log('Navigating to order:', order._id);
+                      navigate(`/orders/${order._id}`);
+                    }}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
                   >
                     View Details

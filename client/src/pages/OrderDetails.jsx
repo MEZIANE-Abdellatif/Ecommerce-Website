@@ -16,13 +16,17 @@ export default function OrderDetails() {
 
   const fetchOrderDetails = async () => {
     try {
+      console.log('Fetching order details for ID:', id);
       const token = localStorage.getItem("token");
       if (!token) {
         navigate("/login");
         return;
       }
 
-      const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(id), {
+      const url = API_ENDPOINTS.ORDER_BY_ID(id);
+      console.log('API URL:', url);
+      
+      const response = await fetch(url, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -33,27 +37,28 @@ export default function OrderDetails() {
         const orderData = await response.json();
         // Transform backend data to match frontend format
         const transformedOrder = {
+          _id: orderData._id,
           id: orderData._id,
+          createdAt: orderData.createdAt,
           date: new Date(orderData.createdAt).toLocaleDateString(),
-          status: orderData.isDelivered ? "Delivered" : orderData.isPaid ? "Processing" : "Pending",
-          total: orderData.totalPrice,
+          status: orderData.isDelivered ? "delivered" : orderData.isPaid ? "paid" : "pending",
+          totalPrice: orderData.totalPrice,
           items: orderData.orderItems.length,
           orderItems: orderData.orderItems.map(item => ({
-            product: {
-              name: item.name,
-              image: item.image,
-              price: item.price
-            },
-            quantity: item.qty
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            qty: item.qty
           })),
-          shippingAddress: {
-            street: orderData.shippingAddress.address,
+          shippingAddress: orderData.shippingAddress ? {
+            address: orderData.shippingAddress.address,
             city: orderData.shippingAddress.city,
-            state: orderData.shippingAddress.postalCode,
-            zipCode: orderData.shippingAddress.postalCode,
+            postalCode: orderData.shippingAddress.postalCode,
             country: orderData.shippingAddress.country
-          },
-          paymentMethod: orderData.paymentMethod
+          } : null,
+          paymentMethod: orderData.paymentMethod,
+          isPaid: orderData.isPaid,
+          paidAt: orderData.paidAt
         };
         setOrder(transformedOrder);
       } else if (response.status === 404) {
