@@ -10,7 +10,7 @@ const Home = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [showVersionPopup, setShowVersionPopup] = useState(true);
+  const [showVersionPopup, setShowVersionPopup] = useState(false);
 
   useEffect(() => {
     fetchProducts();

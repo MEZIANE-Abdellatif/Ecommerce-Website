@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
+import API_BASE_URL from '../config/api';
 
 const Fragrance = () => {
   const [products, setProducts] = useState([]);
@@ -8,10 +9,6 @@ const Fragrance = () => {
   const [selectedFragranceFamily, setSelectedFragranceFamily] = useState('all');
   const [selectedConcentration, setSelectedConcentration] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
-
-  useEffect(() => {
-    fetchFragranceProducts();
-  }, [selectedFragranceFamily, selectedConcentration, fetchFragranceProducts]);
 
   const fetchFragranceProducts = useCallback(async () => {
     try {
@@ -33,6 +30,10 @@ const Fragrance = () => {
       setLoading(false);
     }
   }, [selectedFragranceFamily, selectedConcentration]);
+
+  useEffect(() => {
+    fetchFragranceProducts();
+  }, [fetchFragranceProducts]);
 
   const fragranceFamilies = [
     { id: 'all', label: 'All Families', icon: '✨', color: 'from-pink-400 to-purple-500', description: 'Complete collection' },

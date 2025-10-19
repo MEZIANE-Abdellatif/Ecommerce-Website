@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
+import API_BASE_URL from '../config/api';
 
 const Haircare = () => {
   const [products, setProducts] = useState([]);
@@ -8,10 +9,6 @@ const Haircare = () => {
   const [selectedHairType, setSelectedHairType] = useState('all');
   const [selectedProductType, setSelectedProductType] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
-
-  useEffect(() => {
-    fetchHaircareProducts();
-  }, [selectedHairType, selectedProductType, fetchHaircareProducts]);
 
   const fetchHaircareProducts = useCallback(async () => {
     try {
@@ -33,6 +30,10 @@ const Haircare = () => {
       setLoading(false);
     }
   }, [selectedHairType, selectedProductType]);
+
+  useEffect(() => {
+    fetchHaircareProducts();
+  }, [fetchHaircareProducts]);
 
 
   const hairTypes = [
