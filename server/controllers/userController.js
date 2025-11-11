@@ -612,6 +612,11 @@ const updateUserProfile = async (req, res) => {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
       
+      // Update default address if provided
+      if (req.body.defaultAddress) {
+        user.defaultAddress = req.body.defaultAddress;
+      }
+      
       // Only allow SuperAdmin to modify SuperAdmin status
       if (user.isSuperAdmin && req.body.isSuperAdmin !== undefined) {
         user.isSuperAdmin = req.body.isSuperAdmin;
@@ -627,15 +632,26 @@ const updateUserProfile = async (req, res) => {
       }
 
       const updatedUser = await user.save();
+      
+      console.log("✅ User saved to database:", {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        defaultAddress: updatedUser.defaultAddress
+      });
 
-      res.json({
+      const responseData = {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
         isAdmin: updatedUser.isAdmin,
         isSuperAdmin: updatedUser.isSuperAdmin,
         isVerified: updatedUser.isVerified,
-      });
+        defaultAddress: updatedUser.defaultAddress,
+      };
+      
+      console.log("📤 Sending response:", responseData);
+
+      res.json(responseData);
     } else {
       res.status(404).json({ message: 'User not found' });
     }

@@ -7,6 +7,7 @@ const createOrder = async (req, res) => {
       orderItems,
       shippingAddress,
       paymentMethod,
+      shippingMethod,
       totalPrice,
     } = req.body;
 
@@ -19,6 +20,7 @@ const createOrder = async (req, res) => {
       user: req.user._id,
       shippingAddress,
       paymentMethod,
+      shippingMethod,
       totalPrice,
     });
 

@@ -10,6 +10,7 @@ const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const carouselRoutes = require('./routes/carouselRoutes');
+const geocodeRoutes = require('./routes/geocodeRoutes');
 const { initializeGoogleClient } = require('./controllers/userController');
 
 // Load environment variables
@@ -103,6 +104,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/carousel', carouselRoutes);
+app.use('/api/geocode', geocodeRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { API_ENDPOINTS } from "../config/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
+import CheckoutAddressForm from "../components/CheckoutAddressForm";
 
 export default function Checkout() {
   const { cart, getCartTotal } = useCart();
@@ -14,13 +15,15 @@ export default function Checkout() {
     city: "",
     postalCode: "",
     state: "",
-    country: "",
     shippingMethod: "standard",
+    lat: null,
+    lon: null,
   });
   const [paymentMethod, setPaymentMethod] = useState("");
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const loadCheckoutData = async () => {
     // Check if user is logged in
     const userData = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -32,6 +35,48 @@ export default function Checkout() {
       return;
     }
     
+      try {
+        // Fetch latest user profile from backend to get most recent defaultAddress
+        const profileResponse = await fetch(API_ENDPOINTS.PROFILE, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
+        let latestUser;
+        if (profileResponse.ok) {
+          latestUser = await profileResponse.json();
+          console.log("User profile fetched from backend:", latestUser);
+          console.log("Default address:", latestUser.defaultAddress);
+          setUser(latestUser);
+          // Update localStorage with latest data
+          localStorage.setItem("user", JSON.stringify(latestUser));
+        } else {
+          // Fallback to localStorage if API call fails
+          latestUser = JSON.parse(userData);
+          setUser(latestUser);
+        }
+        
+        // Pre-fill form with user's saved default address
+        const addressData = {
+          email: latestUser.email || "",
+          fullName: latestUser.name || "",
+          address: latestUser.defaultAddress?.street || "",
+          city: latestUser.defaultAddress?.city || "",
+          postalCode: latestUser.defaultAddress?.postalCode || "",
+          state: latestUser.defaultAddress?.state || ""
+        };
+        
+        console.log("Pre-filling checkout form with:", addressData);
+        
+        setFormData(prev => ({
+          ...prev,
+          ...addressData
+        }));
+      } catch (error) {
+        console.error("Error loading user data:", error);
+        // If error, try to use localStorage as fallback
     try {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
@@ -42,17 +87,15 @@ export default function Checkout() {
         address: parsedUser.defaultAddress?.street || "",
         city: parsedUser.defaultAddress?.city || "",
         postalCode: parsedUser.defaultAddress?.postalCode || "",
-        state: parsedUser.defaultAddress?.state || "",
-        country: parsedUser.defaultAddress?.country || ""
+        state: parsedUser.defaultAddress?.state || ""
       }));
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      // If user data is corrupted, redirect to login
+        } catch {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       alert("Please log in or register (and verify your email) to complete your order.");
       navigate("/login");
       return;
+        }
     }
 
     // Check if payment method is selected
@@ -61,72 +104,15 @@ export default function Checkout() {
 
     // Scroll to top
     window.scrollTo(0, 0);
+    };
+    
+    loadCheckoutData();
   }, [location, navigate]);
 
   // If no user, don't render the checkout form
   if (!user) {
     return null;
   }
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!paymentMethod) {
-      alert("Please select a payment method first.");
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      const orderData = {
-        orderItems: cart.map(item => ({
-          product: item._id || item.id,
-          name: item.name,
-          price: typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, "")) : parseFloat(item.price),
-          quantity: item.quantity || 1
-        })),
-        shippingAddress: {
-          fullName: formData.fullName,
-          address: formData.address,
-          city: formData.city,
-          postalCode: formData.postalCode,
-          state: formData.state,
-          country: formData.country
-        },
-        paymentMethod: paymentMethod,
-        shippingMethod: formData.shippingMethod,
-        totalPrice: finalTotal,
-        shippingCost: shippingCost
-      };
-
-      const response = await fetch(API_ENDPOINTS.ORDERS, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(orderData)
-      });
-
-      if (response.ok) {
-        const order = await response.json();
-        // Clear cart and redirect to success page
-        localStorage.removeItem("cart");
-        localStorage.removeItem("paymentMethod");
-        navigate(`/order-success/${order._id}`);
-      } else {
-        const error = await response.json();
-        alert(`Order failed: ${error.message || "Something went wrong"}`);
-      }
-    } catch (error) {
-      console.error("Error creating order:", error);
-      alert("Something went wrong. Please try again.");
-    }
-  };
 
   const total = getCartTotal();
   const shippingCost = formData.shippingMethod === "express" ? 5 : 0;
@@ -188,198 +174,27 @@ export default function Checkout() {
               </h3>
               
               <form className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 group-hover:text-pink-600 transition-colors">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-300 placeholder-gray-400"
-                        placeholder="your.email@example.com"
-                        readOnly={!!user}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-rose-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                  </div>
-
-                  <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 group-hover:text-pink-600 transition-colors">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-300 placeholder-gray-400"
-                        placeholder="Your full name"
-                        readOnly={!!user}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-rose-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="group">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2 group-hover:text-pink-600 transition-colors">
-                    Street Address
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-300 placeholder-gray-400"
-                      placeholder="Street, house/apartment number"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-rose-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                </div>
-
-                <div className="group">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2 group-hover:text-pink-600 transition-colors">
-                    City
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-300 placeholder-gray-400"
-                      placeholder="City name"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-rose-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 group-hover:text-pink-600 transition-colors">
-                      Postal Code
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        name="postalCode"
-                        value={formData.postalCode}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-300 placeholder-gray-400"
-                        placeholder="Postal/ZIP code"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-rose-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                  </div>
-
-                  <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 group-hover:text-pink-600 transition-colors">
-                      State/Province
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        name="state"
-                        value={formData.state}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-300 placeholder-gray-400"
-                        placeholder="State or Province"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-rose-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="group">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2 group-hover:text-pink-600 transition-colors">
-                    Country
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-300 placeholder-gray-400"
-                      placeholder="Country"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-rose-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                </div>
-
-                <div className="group">
-                  <label className="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-pink-600 transition-colors">
-                    Shipping Method
-                  </label>
-                  <div className="space-y-3">
-                    <label className="flex items-center p-4 bg-white/50 backdrop-blur-sm rounded-xl border-2 border-gray-200 hover:border-pink-300 transition-all duration-300 cursor-pointer group/shipping">
-                      <input
-                        type="radio"
-                        name="shippingMethod"
-                        value="standard"
-                        checked={formData.shippingMethod === "standard"}
-                        onChange={handleChange}
-                        className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
-                      />
-                      <div className="ml-4 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-gray-900">Standard Delivery</span>
-                          <span className="text-pink-600 font-bold">Free</span>
-                        </div>
-                        <p className="text-sm text-gray-600">3-5 business days</p>
-                      </div>
-                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center opacity-0 group-hover/shipping:opacity-100 transition-opacity duration-300">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    </label>
-                    
-                    <label className="flex items-center p-4 bg-white/50 backdrop-blur-sm rounded-xl border-2 border-gray-200 hover:border-pink-300 transition-all duration-300 cursor-pointer group/shipping">
-                      <input
-                        type="radio"
-                        name="shippingMethod"
-                        value="express"
-                        checked={formData.shippingMethod === "express"}
-                        onChange={handleChange}
-                        className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
-                      />
-                      <div className="ml-4 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-gray-900">Express Delivery</span>
-                          <span className="text-pink-600 font-bold">+$5.00</span>
-                        </div>
-                        <p className="text-sm text-gray-600">1-2 business days</p>
-                      </div>
-                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center opacity-0 group-hover/shipping:opacity-100 transition-opacity duration-300">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    </label>
-                  </div>
-                </div>
+                <CheckoutAddressForm 
+                  formData={formData} 
+                  setFormData={setFormData}
+                  user={user}
+                />
 
                 <div className="pt-6">
                   <button
                     type="button"
-                    onClick={() => navigate("/payment-method")}
+                    onClick={() => {
+                      console.log("Navigating to payment with shipping data:", formData);
+                      navigate("/payment-method", { 
+                        state: { 
+                          shippingAddress: formData,
+                          shippingMethod: formData.shippingMethod 
+                        } 
+                      });
+                    }}
                     className="group relative w-full py-4 px-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl font-bold text-lg shadow-xl transform hover:scale-105 transition-all duration-300 hover:shadow-2xl"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                     <span className="relative flex items-center justify-center">
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -490,13 +305,6 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <button
-                  onClick={handleSubmit}
-                  className="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-lg rounded-2xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl mt-6"
-                >
-                  Complete Order - ${finalTotal.toFixed(2)}
-                </button>
               </div>
             </div>
           </div>

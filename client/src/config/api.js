@@ -28,6 +28,10 @@ export const API_ENDPOINTS = {
   // User management (admin)
   USERS: `${API_BASE_URL}/api/users`,
   USER_ROLE: (id) => `${API_BASE_URL}/api/users/${id}/role`,
+  
+  // Geocoding endpoints
+  GEOCODE_SEARCH: `${API_BASE_URL}/api/geocode/search`,
+  GEOCODE_DETAILS: `${API_BASE_URL}/api/geocode/details`,
 };
 
 export default API_BASE_URL;

@@ -40,6 +40,13 @@ const userSchema = new mongoose.Schema({
   verificationTokenExpires: {
     type: Date,
   },
+  defaultAddress: {
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    postalCode: { type: String },
+    country: { type: String }
+  },
 }, {
   timestamps: true,
 });

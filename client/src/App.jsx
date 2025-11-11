@@ -11,8 +11,6 @@ import RegisterConfirmation from "./pages/RegisterConfirmation";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import PaymentMethod from "./pages/PaymentMethod";
-import MyOrders from "./pages/MyOrders";
-import OrderDetails from "./pages/OrderDetails";
 import VerifyEmail from "./pages/VerifyEmail";
 import Dashboard from "./pages/Dashboard";
 import Makeup from "./pages/Makeup";
@@ -46,8 +44,6 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/payment-method" element={<PaymentMethod />} />
-        <Route path="/my-orders" element={<MyOrders />} />
-        <Route path="/orders/:id" element={<OrderDetails />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/dashboard" element={<Dashboard />} />
         

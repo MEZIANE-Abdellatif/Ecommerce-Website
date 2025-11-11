@@ -59,10 +59,25 @@ export default function Profile() {
     const userFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     setFavorites(userFavorites);
     
-    // Load orders from API
     try {
       const token = localStorage.getItem("token");
       if (token) {
+        // Fetch latest user profile from backend
+        const profileResponse = await fetch(API_ENDPOINTS.PROFILE, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
+        if (profileResponse.ok) {
+          const latestUserData = await profileResponse.json();
+          setUser(latestUserData);
+          // Update localStorage with latest data
+          localStorage.setItem("user", JSON.stringify(latestUserData));
+        }
+        
+        // Load orders from API
         const response = await fetch(API_ENDPOINTS.MY_ORDERS, {
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -88,13 +103,14 @@ export default function Profile() {
               quantity: item.qty
             })),
             shippingAddress: {
+              fullName: order.shippingAddress.fullName || '',
               street: order.shippingAddress.address,
               city: order.shippingAddress.city,
-              state: order.shippingAddress.postalCode,
-              zipCode: order.shippingAddress.postalCode,
-              country: order.shippingAddress.country
+              state: order.shippingAddress.state || '',
+              zipCode: order.shippingAddress.postalCode
             },
-            paymentMethod: order.paymentMethod
+            paymentMethod: order.paymentMethod,
+            shippingMethod: order.shippingMethod || 'standard'
           }));
           setOrders(transformedOrders);
           
@@ -151,8 +167,16 @@ export default function Profile() {
   const handleViewOrderDetails = (orderId) => {
     const order = orders.find(o => o.id === orderId);
     if (order) {
-      setSelectedOrder(order);
-      setActiveTab("orders");
+      // Toggle: if clicking the same order, close it; otherwise open the new order
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(null);
+      } else {
+        setSelectedOrder(order);
+        // Switch to orders tab only if not already there
+        if (activeTab !== "orders") {
+          setActiveTab("orders");
+        }
+      }
     }
   };
 
@@ -406,36 +430,34 @@ export default function Profile() {
                         ) : (
                           <div className="space-y-4">
                             {orders.map((order) => (
-                              <div key={order.id} className="bg-white rounded-2xl p-3 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-                                  <div className="min-w-0 flex-1">
-                                    <h3 className="text-sm sm:text-lg font-bold text-gray-800 truncate">Order #{order.id}</h3>
-                                    <p className="text-xs sm:text-base text-gray-600 truncate">Placed on {order.date}</p>
+                              <div key={order.id}>
+                                <div className="bg-white rounded-2xl p-3 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <h3 className="text-sm sm:text-lg font-bold text-gray-800 truncate">Order #{order.id}</h3>
+                                      <p className="text-xs sm:text-base text-gray-600 truncate">Placed on {order.date}</p>
+                                    </div>
+                                    <div className="text-left sm:text-right flex-shrink-0">
+                                      <p className="text-lg sm:text-2xl font-bold text-gray-800">${order.total}</p>
+                                      <p className="text-xs sm:text-base text-gray-600">{order.items} items</p>
+                                    </div>
                                   </div>
-                                  <div className="text-left sm:text-right flex-shrink-0">
-                                    <p className="text-lg sm:text-2xl font-bold text-gray-800">${order.total}</p>
-                                    <p className="text-xs sm:text-base text-gray-600">{order.items} items</p>
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+                                    <span className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)} w-fit`}>
+                                      {order.status}
+                                    </span>
+                                    <button 
+                                      onClick={() => handleViewOrderDetails(order.id)}
+                                      className="px-3 sm:px-4 py-2 text-pink-600 hover:text-pink-700 font-medium transition-all duration-500 ease-in-out hover:bg-pink-50 rounded-lg w-full sm:w-auto text-sm sm:text-base transform hover:scale-105 hover:shadow-md"
+                                    >
+                                      {selectedOrder?.id === order.id ? "Hide Details" : "View Details"}
+                                    </button>
                                   </div>
                                 </div>
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-                                  <span className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)} w-fit`}>
-                                    {order.status}
-                                  </span>
-                                  <button 
-                                    onClick={() => handleViewOrderDetails(order.id)}
-                                    className="px-3 sm:px-4 py-2 text-pink-600 hover:text-pink-700 font-medium transition-all duration-500 ease-in-out hover:bg-pink-50 rounded-lg w-full sm:w-auto text-sm sm:text-base transform hover:scale-105 hover:shadow-md"
-                                  >
-                                    View Details
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
 
-                        {/* Order Details Section - Mobile responsive with dropdown animation */}
-                        {selectedOrder && (
-                          <div className="mt-8 bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 w-full animate-fade-in-down">
+                                {/* Order Details Section - Appears directly below this order */}
+                                {selectedOrder?.id === order.id && (
+                                  <div className="mt-4 bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 w-full animate-fade-in-down">
                             <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2">
                               <h3 className="text-lg sm:text-2xl font-bold text-gray-800 truncate flex-1 min-w-0">Order Details - #{selectedOrder.id}</h3>
                               <button
@@ -500,12 +522,27 @@ export default function Profile() {
                                 {/* Shipping Address */}
                                 <div className="w-full">
                                   <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Shipping Address</h4>
-                                  <div className="bg-gray-50 rounded-xl p-4 w-full">
+                                  <div className="bg-gray-50 rounded-xl p-4 w-full space-y-1">
+                                    {selectedOrder.shippingAddress.fullName && (
+                                      <p className="font-bold text-gray-900 text-sm sm:text-base">{selectedOrder.shippingAddress.fullName}</p>
+                                    )}
                                     <p className="font-medium text-gray-800 text-sm sm:text-base">{selectedOrder.shippingAddress.street}</p>
                                     <p className="text-gray-600 text-sm sm:text-base">
-                                      {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}
+                                      {selectedOrder.shippingAddress.city}{selectedOrder.shippingAddress.state && `, ${selectedOrder.shippingAddress.state}`} {selectedOrder.shippingAddress.zipCode}
                                     </p>
-                                    <p className="text-gray-600 text-sm sm:text-base">{selectedOrder.shippingAddress.country}</p>
+                                    <p className="text-gray-600 text-sm sm:text-base">Poland</p>
+                                  </div>
+                                </div>
+
+                                {/* Shipping Method */}
+                                <div className="w-full">
+                                  <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Shipping Method</h4>
+                                  <div className="bg-gray-50 rounded-xl p-4 w-full">
+                                    <p className="font-medium text-gray-800 text-sm sm:text-base capitalize">
+                                      {selectedOrder.shippingMethod === 'standard' ? 'Standard Delivery (3-5 business days)' : 
+                                       selectedOrder.shippingMethod === 'express' ? 'Express Delivery (1-2 business days)' : 
+                                       selectedOrder.shippingMethod}
+                                    </p>
                                   </div>
                                 </div>
 
@@ -518,6 +555,10 @@ export default function Profile() {
                                 </div>
                               </div>
                             </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
@@ -588,8 +629,11 @@ export default function Profile() {
                                 <input
                                   type="text"
                                   value={user.name}
+                                  onChange={(e) => {
+                                    const updatedUser = { ...user, name: e.target.value };
+                                    setUser(updatedUser);
+                                  }}
                                   className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm sm:text-base"
-                                  readOnly
                                 />
                               </div>
                               <div>
@@ -597,8 +641,9 @@ export default function Profile() {
                                 <input
                                   type="email"
                                   value={user.email}
-                                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm sm:text-base"
+                                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-gray-50 text-sm sm:text-base"
                                   readOnly
+                                  title="Email cannot be changed"
                                 />
                               </div>
                             </div>
@@ -671,26 +716,47 @@ export default function Profile() {
                                     placeholder="State or Province"
                                   />
                                 </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
-                                  <input
-                                    type="text"
-                                    value={user.defaultAddress?.country || ""}
-                                    onChange={(e) => {
-                                      const updatedUser = { ...user };
-                                      if (!updatedUser.defaultAddress) updatedUser.defaultAddress = {};
-                                      updatedUser.defaultAddress.country = e.target.value;
-                                      setUser(updatedUser);
-                                      localStorage.setItem("user", JSON.stringify(updatedUser));
-                                    }}
-                                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm sm:text-base"
-                                    placeholder="Country"
-                                  />
-                                </div>
                               </div>
                             </div>
-                            <button className="mt-4 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base font-medium">
-                              Edit Profile
+                            <button 
+                              onClick={async () => {
+                                try {
+                                  const token = localStorage.getItem("token");
+                                  const dataToSend = {
+                                    name: user.name,
+                                    defaultAddress: user.defaultAddress
+                                  };
+                                  
+                                  console.log("Saving profile with data:", dataToSend);
+                                  
+                                  const response = await fetch(API_ENDPOINTS.PROFILE, {
+                                    method: "PUT",
+                                    headers: {
+                                      "Authorization": `Bearer ${token}`,
+                                      "Content-Type": "application/json"
+                                    },
+                                    body: JSON.stringify(dataToSend)
+                                  });
+                                  
+                                  if (response.ok) {
+                                    const updatedUser = await response.json();
+                                    console.log("Profile updated successfully. Response:", updatedUser);
+                                    setUser(updatedUser);
+                                    localStorage.setItem("user", JSON.stringify(updatedUser));
+                                    alert("Profile updated successfully!");
+                                  } else {
+                                    const errorData = await response.json();
+                                    console.error("Failed to update profile:", errorData);
+                                    alert("Failed to update profile: " + (errorData.message || "Unknown error"));
+                                  }
+                                } catch (error) {
+                                  console.error("Error updating profile:", error);
+                                  alert("Error updating profile: " + error.message);
+                                }
+                              }}
+                              className="mt-4 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base font-medium"
+                            >
+                              Save Changes
                             </button>
                           </div>
 

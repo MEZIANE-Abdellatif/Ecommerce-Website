@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API_ENDPOINTS } from "../config/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import axios from "axios";
 
@@ -10,7 +10,16 @@ export default function PaymentMethod() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { cart, clearCart, getCartTotal } = useCart();
+  
+  // Get shipping data from navigation state
+  const shippingData = location.state?.shippingAddress;
+  const shippingMethodData = location.state?.shippingMethod;
+  
+  // Debug: Log shipping data received
+  console.log("Shipping data received from Checkout:", shippingData);
+  console.log("Shipping method received:", shippingMethodData);
 
   // Add custom CSS for smooth slide-down animation
   useEffect(() => {
@@ -77,6 +86,13 @@ export default function PaymentMethod() {
       return;
     }
 
+    // Validate shipping address exists
+    if (!shippingData || !shippingData.address || !shippingData.city) {
+      alert("Please complete the checkout form first");
+      navigate("/checkout");
+      return;
+    }
+
     // Load previously selected method from localStorage
     const savedMethod = localStorage.getItem("paymentMethod");
     if (savedMethod) {
@@ -87,7 +103,7 @@ export default function PaymentMethod() {
     
     // Scroll to top
     window.scrollTo(0, 0);
-  }, [navigate]);
+  }, [navigate, shippingData]);
 
   const handleMethodChange = (method) => {
     setSelectedMethod(method);
@@ -112,6 +128,9 @@ export default function PaymentMethod() {
         return;
       }
 
+      // Get user data for fallback
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+
       // Prepare order data
       const orderData = {
         orderItems: cart.map(item => ({
@@ -121,14 +140,20 @@ export default function PaymentMethod() {
           price: typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, "")) : parseFloat(item.price)
         })),
         shippingAddress: {
-          address: "Sample Address", // You can get this from checkout form
-          city: "Sample City",
-          postalCode: "12345",
-          country: "Sample Country"
+          fullName: shippingData?.fullName || userData?.name || "",
+          address: shippingData?.address || "",
+          city: shippingData?.city || "",
+          postalCode: shippingData?.postalCode || "",
+          state: shippingData?.state || "",
+          country: "Poland"
         },
         paymentMethod: selectedMethod,
+        shippingMethod: shippingMethodData || "standard",
         totalPrice: getCartTotal()
       };
+
+      // Debug: Log order data to verify it contains real address
+      console.log("Creating order with data:", orderData);
 
       // Create order via API
       await axios.post(
