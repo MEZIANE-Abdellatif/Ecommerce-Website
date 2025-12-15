@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+ import { API_ENDPOINTS } from "../config/api";
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
