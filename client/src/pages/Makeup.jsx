@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
+import { API_ENDPOINTS } from '../config/api';
 
 const Makeup = () => {
   const [products, setProducts] = useState([]);
@@ -16,7 +17,9 @@ const Makeup = () => {
         params.append('skinPart', selectedSkinPart);
       }
       
-      const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`);
+      const response = await fetch(
+        `${API_ENDPOINTS.PRODUCTS}?${params.toString()}`
+      );
       const data = await response.json();
       setProducts(data);
       setLoading(false);

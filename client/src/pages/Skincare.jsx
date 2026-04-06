@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
+import { API_ENDPOINTS } from '../config/api';
 
 const Skincare = () => {
   const [products, setProducts] = useState([]);
@@ -21,7 +22,9 @@ const Skincare = () => {
       }
       
       console.log('Fetching with params:', params.toString()); // Debug log
-      const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`);
+      const response = await fetch(
+        `${API_ENDPOINTS.PRODUCTS}?${params.toString()}`
+      );
       const data = await response.json();
       console.log('Received products:', data.length); // Debug log
       setProducts(data);
