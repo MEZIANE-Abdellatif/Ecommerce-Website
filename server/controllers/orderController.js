@@ -1,10 +1,10 @@
 const Order = require('../models/Order');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Guard: fail loudly at startup if key is missing
+// Guard must run before require('stripe')(...) — Stripe throws first if key is missing/empty
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not defined');
 }
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create new order
 const createOrder = async (req, res) => {
