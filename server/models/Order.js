@@ -39,6 +39,10 @@ const orderSchema = new mongoose.Schema({
     status: { type: String },
     update_time: { type: String },
     email_address: { type: String },
+    // Stripe-specific fields
+    payment_intent_id: { type: String },   // Stripe PaymentIntent id (pi_xxx)
+    payment_method_type: { type: String }, // "card", "blik", or "p24"
+    amount_received: { type: Number },     // confirmed amount in grosz
   },
   totalPrice: {
     type: Number,

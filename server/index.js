@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
@@ -12,9 +12,6 @@ const orderRoutes = require('./routes/orderRoutes');
 const carouselRoutes = require('./routes/carouselRoutes');
 const geocodeRoutes = require('./routes/geocodeRoutes');
 const { initializeGoogleClient } = require('./controllers/userController');
-
-// Load environment variables
-dotenv.config();
 
 // Initialize Google client after environment is loaded
 if (!initializeGoogleClient()) {
@@ -95,14 +92,18 @@ app.use(compression());
 // Request logging
 app.use(morgan('combined'));
 
-// Body parsing middleware with limits
+// STRIPE WEBHOOK — /api/orders/webhook must be mounted BEFORE express.json()
+// express.raw() on the route itself gives Stripe the raw Buffer for signature
+// verification. Moving this below express.json() silently breaks all webhooks.
+app.use('/api/orders', orderRoutes);
+
+// Body parsing — must come AFTER webhook route
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Mount routes with rate limiting for auth routes
+// Remaining routes (these need parsed JSON body — correct position)
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/orders', orderRoutes);
 app.use('/api/carousel', carouselRoutes);
 app.use('/api/geocode', geocodeRoutes);
 
