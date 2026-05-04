@@ -1,6 +1,11 @@
 // API configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+export const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+  console.warn('VITE_STRIPE_PUBLISHABLE_KEY is not set');
+}
+
 export const API_ENDPOINTS = {
   // Auth endpoints
   LOGIN: `${API_BASE_URL}/api/users/login`,
@@ -20,6 +25,8 @@ export const API_ENDPOINTS = {
   ORDERS: `${API_BASE_URL}/api/orders`,
   MY_ORDERS: `${API_BASE_URL}/api/orders/myorders`,
   ORDER_BY_ID: (id) => `${API_BASE_URL}/api/orders/${id}`,
+  CREATE_PAYMENT_INTENT: (orderId) =>
+    `${API_BASE_URL}/api/orders/${orderId}/create-payment-intent`,
   
   // Carousel endpoints
   CAROUSEL_SLIDES: `${API_BASE_URL}/api/carousel/slides`,

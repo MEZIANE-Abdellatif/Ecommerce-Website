@@ -1,14 +1,61 @@
 import React, { useState, useEffect } from "react";
-import { API_ENDPOINTS } from "../config/api";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { API_ENDPOINTS, STRIPE_PUBLISHABLE_KEY } from "../config/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import axios from "axios";
 
+const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+
+function StripePaymentForm({ orderId: _orderId, onSuccess, onError }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [processing, setProcessing] = useState(false);
+
+  const handleStripeSubmit = async (e) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setProcessing(true);
+
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/success`,
+      },
+      redirect: "if_required",
+    });
+
+    if (error) {
+      onError(error.message);
+      setProcessing(false);
+    } else {
+      onSuccess();
+    }
+  };
+
+  return (
+    <form onSubmit={handleStripeSubmit} className="space-y-6">
+      <PaymentElement />
+      <button
+        type="submit"
+        disabled={!stripe || processing}
+        className="group relative w-full min-h-[44px] py-4 px-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl font-bold text-lg shadow-xl transform hover:scale-105 transition-all duration-300 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+      >
+        {processing ? "Processing..." : "Pay Now"}
+      </button>
+    </form>
+  );
+}
+
 export default function PaymentMethod() {
-  const [selectedMethod, setSelectedMethod] = useState("blik");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [clientSecret, setClientSecret] = useState(null);
+  const [orderId, setOrderId] = useState(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
+  const [stripeError, setStripeError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { cart, clearCart, getCartTotal } = useCart();
@@ -20,61 +67,6 @@ export default function PaymentMethod() {
   // Debug: Log shipping data received
   console.log("Shipping data received from Checkout:", shippingData);
   console.log("Shipping method received:", shippingMethodData);
-
-  // Add custom CSS for smooth slide-down animation
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideDown {
-        0% {
-          opacity: 0;
-          transform: translateY(-30px) scale(0.9);
-          max-height: 0;
-        }
-        30% {
-          opacity: 0.3;
-          transform: translateY(-15px) scale(0.95);
-          max-height: 100px;
-        }
-        60% {
-          opacity: 0.7;
-          transform: translateY(-5px) scale(0.98);
-          max-height: 300px;
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-          max-height: 1000px;
-        }
-      }
-      
-      .animate-slideDown {
-        animation: slideDown 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        transform-origin: top;
-      }
-      
-      .animate-fadeIn {
-        animation: fadeIn 0.4s ease-out 0.15s both;
-      }
-      
-      @keyframes fadeIn {
-        0% {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      if (document.head.contains(style)) {
-        document.head.removeChild(style);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     // Check if user is logged in
@@ -93,33 +85,19 @@ export default function PaymentMethod() {
       return;
     }
 
-    // Load previously selected method from localStorage
-    const savedMethod = localStorage.getItem("paymentMethod");
-    if (savedMethod) {
-      setSelectedMethod(savedMethod);
-    }
-
     setLoading(false);
     
     // Scroll to top
     window.scrollTo(0, 0);
   }, [navigate, shippingData]);
 
-  const handleMethodChange = (method) => {
-    setSelectedMethod(method);
-    setError(""); // Clear error when user makes a selection
-  };
-
-  const handleSubmit = async (e) => {
+  const handleCreateOrder = async (e) => {
     e.preventDefault();
-    
-    if (!selectedMethod) {
-      setError("Please select a payment method!");
-      return;
-    }
 
     setSubmitting(true);
+    setStripeLoading(true);
     setError("");
+    setStripeError(null);
 
     try {
       const token = localStorage.getItem("token");
@@ -128,16 +106,17 @@ export default function PaymentMethod() {
         return;
       }
 
-      // Get user data for fallback
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
-      // Prepare order data
       const orderData = {
-        orderItems: cart.map(item => ({
+        orderItems: cart.map((item) => ({
           name: item.name,
           qty: item.quantity || 1,
           image: item.images?.[0] || item.image || "https://via.placeholder.com/300x200",
-          price: typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, "")) : parseFloat(item.price)
+          price:
+            typeof item.price === "string"
+              ? parseFloat(item.price.replace(/[^\d.]/g, ""))
+              : parseFloat(item.price),
         })),
         shippingAddress: {
           fullName: shippingData?.fullName || userData?.name || "",
@@ -145,18 +124,16 @@ export default function PaymentMethod() {
           city: shippingData?.city || "",
           postalCode: shippingData?.postalCode || "",
           state: shippingData?.state || "",
-          country: "Poland"
+          country: "Poland",
         },
-        paymentMethod: selectedMethod,
+        paymentMethod: "stripe",
         shippingMethod: shippingMethodData || "standard",
-        totalPrice: getCartTotal()
+        totalPrice: getCartTotal(),
       };
 
-      // Debug: Log order data to verify it contains real address
       console.log("Creating order with data:", orderData);
 
-      // Create order via API
-      await axios.post(
+      const { data: createdOrder } = await axios.post(
         API_ENDPOINTS.ORDERS,
         orderData,
         {
@@ -167,16 +144,38 @@ export default function PaymentMethod() {
         }
       );
 
-      // Clear cart and payment method
-      clearCart();
-      localStorage.removeItem("paymentMethod");
-      
+      const { data: intentPayload } = await axios.post(
+        API_ENDPOINTS.CREATE_PAYMENT_INTENT(createdOrder._id),
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!intentPayload?.clientSecret) {
+        setStripeError("Payment could not be initialized. Please try again.");
+        return;
+      }
+
+      setOrderId(createdOrder._id);
+      setClientSecret(intentPayload.clientSecret);
+    } catch (err) {
+      console.error("Error creating order or payment intent:", err);
+      const msg =
+        err.response?.data?.message ||
+        "Failed to start checkout. Please try again.";
+      const url = err.config?.url || "";
+      if (url.includes("create-payment-intent")) {
+        setStripeError(msg);
+      } else {
+        setError(msg);
+      }
+    } finally {
       setSubmitting(false);
-      navigate("/success");
-    } catch (error) {
-      console.error("Error creating order:", error);
-      setError(error.response?.data?.message || "Failed to create order. Please try again.");
-      setSubmitting(false);
+      setStripeLoading(false);
     }
   };
 
@@ -189,38 +188,11 @@ export default function PaymentMethod() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </div>
-          <p className="text-lg text-gray-600 font-medium">Loading payment options...</p>
+          <p className="text-lg text-gray-600 font-medium">Loading checkout...</p>
         </div>
       </div>
     );
   }
-
-  const paymentMethods = [
-    {
-      id: "blik",
-      name: "BLIK",
-      description: "Fast mobile payment with instant confirmation",
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      ),
-      features: ["Instant payment", "Mobile app", "Secure"],
-      color: "from-blue-500 to-cyan-500"
-    },
-    {
-      id: "card",
-      name: "Card Payment",
-      description: "Secure credit and debit card payments",
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-        </svg>
-      ),
-      features: ["Visa & Mastercard", "Secure processing", "Instant confirmation"],
-      color: "from-green-500 to-emerald-500"
-    },
-  ];
 
   const total = getCartTotal();
 
@@ -243,13 +215,13 @@ export default function PaymentMethod() {
             </svg>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-rose-600 bg-clip-text text-transparent mb-3">
-            Choose Payment Method
+            Payment
           </h1>
           <p className="text-lg text-gray-600 max-w-xl mx-auto">
-            Select the most convenient and secure payment option for your Mazzinka order!
+            Confirm your order, then pay with Stripe — choose card, BLIK, or other options Stripe offers for your order.
           </p>
           <p className="text-sm text-gray-500 mt-2 italic">
-            * Payment backend integration is not active in demo version
+            * No duplicate method selection here; you pick how to pay only in the secure Stripe step
           </p>
         </div>
 
@@ -263,208 +235,43 @@ export default function PaymentMethod() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
                 </span>
-                <span className="truncate">Available Payment Options</span>
+                <span className="truncate">
+                  {clientSecret ? "Complete payment" : "Confirm & continue"}
+                </span>
               </h3>
 
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  {paymentMethods.map((method) => (
-                    <label
-                      key={method.id}
-                      className="group relative block cursor-pointer transition-all duration-300"
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value={method.id}
-                        checked={selectedMethod === method.id}
-                        onChange={() => handleMethodChange(method.id)}
-                        className="sr-only"
-                      />
-                      
-                      <div className={`relative p-4 sm:p-6 bg-white/70 backdrop-blur-sm rounded-2xl transition-all duration-300 ${
-                        selectedMethod === method.id
-                          ? 'bg-gradient-to-r from-pink-50 to-rose-50 shadow-xl'
-                          : 'hover:shadow-md'
-                      }`}>
-                        {/* Selection Indicator */}
-                        <div className={`absolute top-3 right-3 sm:top-4 sm:right-4 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
-                          selectedMethod === method.id
-                            ? 'border-pink-500 bg-pink-500 scale-110'
-                            : 'border-gray-300 scale-100'
-                        }`}>
-                          {selectedMethod === method.id && (
-                            <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-4">
-                          {/* Method Icon */}
-                          <div className={`p-2 sm:p-3 rounded-xl transition-all duration-300 flex-shrink-0 self-center sm:self-start ${
-                            selectedMethod === method.id
-                              ? `bg-gradient-to-r ${method.color} text-white shadow-lg`
-                              : 'bg-gray-100 text-gray-600'
-                          }`}>
-                            <div className="w-6 h-6 sm:w-8 sm:h-8">
-                              {method.icon}
-                            </div>
-                          </div>
-
-                          {/* Method Details */}
-                          <div className="flex-1 min-w-0 text-center sm:text-left">
-                            <div className="font-bold text-lg sm:text-xl text-gray-900 mb-2 truncate">
-                              {method.name}
-                            </div>
-                            <div className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed">
-                              {method.description}
-                            </div>
-                            
-                            {/* Features */}
-                            <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center sm:justify-start">
-                              {method.features.map((feature, index) => (
-                                <span key={index} className="px-2 sm:px-3 py-1 bg-pink-100 text-pink-700 text-xs font-medium rounded-full">
-                                  {feature}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-
-                      </div>
-
-                      {/* Dynamic Payment Forms - Appear under selected card */}
-                      {selectedMethod === method.id && (
-                        <div className="mt-4 animate-slideDown overflow-hidden">
-                          {method.id === "blik" && (
-                            <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/20 animate-fadeIn">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center flex-shrink-0">
-                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                  </svg>
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">BLIK Payment</h3>
-                                  <p className="text-xs sm:text-sm text-gray-600">Enter your 6-digit BLIK code</p>
-                                </div>
-                              </div>
-                              
-                              <div className="space-y-4">
-                                <div>
-                                  <label className="block text-sm font-semibold text-gray-700 mb-2">BLIK Code</label>
-                                  <input
-                                    type="text"
-                                    placeholder="123456"
-                                    maxLength="6"
-                                    className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-center text-xl font-mono tracking-widest"
-                                  />
-                                </div>
-                                <div className="text-center">
-                                  <p className="text-sm text-gray-500">
-                                    Open your banking app and generate a BLIK code
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {method.id === "card" && (
-                            <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/20 animate-fadeIn">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center flex-shrink-0">
-                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                  </svg>
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">Card Payment</h3>
-                                  <p className="text-xs sm:text-sm text-gray-600">Enter your card details securely</p>
-                                </div>
-                              </div>
-                              
-                              <div className="space-y-4">
-                                <div>
-                                  <label className="block text-sm font-semibold text-gray-700 mb-2">Card Number</label>
-                                  <input
-                                    type="text"
-                                    placeholder="1234 5678 9012 3456"
-                                    className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 font-mono"
-                                  />
-                                </div>
-                                
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Expiry Date</label>
-                                    <input
-                                      type="text"
-                                      placeholder="MM/YY"
-                                      className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-center"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">CVV</label>
-                                    <input
-                                      type="text"
-                                      placeholder="123"
-                                      maxLength="4"
-                                      className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-center"
-                                    />
-                                  </div>
-                                </div>
-                                
-                                <div>
-                                  <label className="block text-sm font-semibold text-gray-700 mb-2">Cardholder Name</label>
-                                  <input
-                                    type="text"
-                                    placeholder="John Doe"
-                                    className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
-                                  />
-                                </div>
-                                
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                  <span>Your payment information is encrypted and secure</span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </label>
-                  ))}
-                </div>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl backdrop-blur-sm">
-                    <div className="flex items-center">
-                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      {error}
-                    </div>
+              {(error || stripeError) && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl backdrop-blur-sm">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {error || stripeError}
                   </div>
-                )}
+                </div>
+              )}
+
+              {!clientSecret ? (
+              <form onSubmit={handleCreateOrder}>
+                <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                  Click below to create your order and open Stripe. You will choose card, BLIK, or bank transfer there — not on this page.
+                </p>
 
                 {/* Place Order Button */}
                 <div className="mt-8">
                   <button
                     type="submit"
-                    disabled={submitting}
-                    className="group relative w-full py-4 px-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl font-bold text-lg shadow-xl transform hover:scale-105 transition-all duration-300 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    disabled={submitting || stripeLoading}
+                    className="group relative w-full min-h-[44px] py-4 px-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl font-bold text-lg shadow-xl transform hover:scale-105 transition-all duration-300 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <span className="relative flex items-center justify-center">
-                      {submitting ? (
+                      {submitting || stripeLoading ? (
                         <>
                           <svg className="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
-                          Creating Your Order...
+                          Preparing payment...
                         </>
                       ) : (
                         <>
@@ -478,6 +285,22 @@ export default function PaymentMethod() {
                   </button>
                 </div>
               </form>
+              ) : (
+                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <StripePaymentForm
+                    orderId={orderId}
+                    onSuccess={() => {
+                      clearCart();
+                      localStorage.removeItem("paymentMethod");
+                      navigate("/success");
+                    }}
+                    onError={(msg) => {
+                      setStripeError(null);
+                      setError(msg);
+                    }}
+                  />
+                </Elements>
+              )}
             </div>
 
 
@@ -542,15 +365,15 @@ export default function PaymentMethod() {
                   </div>
                 </div>
 
-                {/* Selected Payment Method */}
+                {/* Payment via Stripe */}
                 <div className="p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-pink-200 my-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-700">Payment Method:</span>
-                                         <span className="px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-bold rounded-full">
-                       {selectedMethod === "blik" ? "BLIK" : 
-                        selectedMethod === "card" ? "Card Payment" : selectedMethod}
-                     </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-gray-700">Checkout:</span>
+                    <span className="px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-bold rounded-full text-center">
+                      Stripe
+                    </span>
                   </div>
+                  <p className="text-xs text-gray-500 mt-2">Method (card, BLIK, …) is chosen in the Stripe step only.</p>
                 </div>
 
                 {/* Trust Indicators */}
