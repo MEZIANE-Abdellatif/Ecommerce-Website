@@ -17,17 +17,16 @@ export default function AddressSearchField({
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [value, setValue] = useState('');
-  const [debounceTimer, setDebounceTimer] = useState(null);
-  const [abortController, setAbortController] = useState(null);
-  
+
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const wrapperRef = useRef(null);
   const justSelectedRef = useRef(false);
+  const debounceTimerRef = useRef(null);
+  const abortRef = useRef(null);
 
   // Fetch suggestions from backend
   const fetchSuggestions = useCallback(async (query) => {
-    // Don't fetch if we just selected a suggestion
     if (justSelectedRef.current) {
       return;
     }
@@ -38,23 +37,21 @@ export default function AddressSearchField({
       return;
     }
 
-    // Cancel previous request
-    if (abortController) {
-      abortController.abort();
+    if (abortRef.current) {
+      abortRef.current.abort();
     }
 
     const newController = new AbortController();
-    setAbortController(newController);
+    abortRef.current = newController;
     setIsLoading(true);
 
     try {
       const params = new URLSearchParams({
         q: query.trim(),
-        type: 'street', // Use 'street' type which maps to 'address' in Google Places
+        type: 'street',
         lang: lang
       });
-      
-      // Only include country if provided (allows global search)
+
       if (country && country.trim() !== '') {
         params.append('country', country);
       }
@@ -68,14 +65,10 @@ export default function AddressSearchField({
       }
 
       const data = await response.json();
-      
-      // Don't open dropdown if we just selected (check again after async operation)
+
       if (!newController.signal.aborted && !justSelectedRef.current) {
         setSuggestions(data);
         setIsOpen(data.length > 0);
-        setIsLoading(false);
-      } else {
-        setIsLoading(false);
       }
     } catch (error) {
       if (error.name !== 'AbortError' && !newController.signal.aborted) {
@@ -84,70 +77,71 @@ export default function AddressSearchField({
           setSuggestions([]);
           setIsOpen(false);
         }
-        setIsLoading(false);
       }
+    } finally {
+      setIsLoading(false);
     }
-  }, [country, lang, abortController]);
+  }, [country, lang]);
 
   // Debounce input changes
   useEffect(() => {
-    // Don't fetch if we just selected a suggestion
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
       return;
     }
 
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
 
     const timer = setTimeout(() => {
+      debounceTimerRef.current = null;
       fetchSuggestions(value);
     }, 250);
 
-    setDebounceTimer(timer);
+    debounceTimerRef.current = timer;
 
     return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
+      clearTimeout(timer);
     };
   }, [value, fetchSuggestions]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      abortRef.current?.abort();
+    };
+  }, []);
 
   // Handle input change
   const handleChange = (e) => {
     const newValue = e.target.value;
     setValue(newValue);
     setHighlightedIndex(-1);
-    // Reset justSelected flag when user starts typing again
     justSelectedRef.current = false;
   };
 
   // Handle suggestion selection
   const handleSelect = (suggestion) => {
-    // Set flag immediately to prevent any new fetches
     justSelectedRef.current = true;
-    
-    // Cancel any pending fetch
-    if (abortController) {
-      abortController.abort();
+
+    if (abortRef.current) {
+      abortRef.current.abort();
     }
-    
-    // Clear debounce timer to prevent delayed fetches
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      setDebounceTimer(null);
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
-    
-    // Clear suggestions and close dropdown immediately
+
     setSuggestions([]);
     setIsOpen(false);
     setHighlightedIndex(-1);
-    
-    // Set the value
+
     setValue(suggestion.display_name);
-    
-    // Call onAddressSelect with place_id
+
     if (onAddressSelect && suggestion.place_id) {
       onAddressSelect(suggestion.place_id);
     }
@@ -165,7 +159,7 @@ export default function AddressSearchField({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setHighlightedIndex(prev => 
+        setHighlightedIndex(prev =>
           prev < suggestions.length - 1 ? prev + 1 : prev
         );
         break;
@@ -183,6 +177,8 @@ export default function AddressSearchField({
         e.preventDefault();
         setIsOpen(false);
         setHighlightedIndex(-1);
+        break;
+      default:
         break;
     }
   };
@@ -225,7 +221,6 @@ export default function AddressSearchField({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           onFocus={() => {
-            // Only open if we have suggestions and haven't just selected
             if (suggestions.length > 0 && !justSelectedRef.current) {
               setIsOpen(true);
             }
@@ -238,7 +233,7 @@ export default function AddressSearchField({
           aria-haspopup="listbox"
           role="combobox"
         />
-        
+
         {isLoading && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
             <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -248,7 +243,6 @@ export default function AddressSearchField({
           </div>
         )}
 
-        {/* Suggestions dropdown */}
         {isOpen && suggestions.length > 0 && (
           <div
             ref={listRef}
@@ -285,4 +279,3 @@ export default function AddressSearchField({
     </div>
   );
 }
-

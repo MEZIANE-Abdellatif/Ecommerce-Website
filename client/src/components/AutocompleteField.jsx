@@ -23,12 +23,12 @@ export default function AutocompleteField({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [debounceTimer, setDebounceTimer] = useState(null);
-  const [abortController, setAbortController] = useState(null);
-  
+
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const wrapperRef = useRef(null);
+  const debounceTimerRef = useRef(null);
+  const abortRef = useRef(null);
 
   // Load recent picks on mount
   useEffect(() => {
@@ -44,13 +44,12 @@ export default function AutocompleteField({
       return;
     }
 
-    // Cancel previous request
-    if (abortController) {
-      abortController.abort();
+    if (abortRef.current) {
+      abortRef.current.abort();
     }
 
     const newController = new AbortController();
-    setAbortController(newController);
+    abortRef.current = newController;
     setIsLoading(true);
 
     try {
@@ -82,28 +81,29 @@ export default function AutocompleteField({
     } finally {
       setIsLoading(false);
     }
-  }, [queryType, country, lang, abortController]);
+  }, [queryType, country, lang]);
 
   // Handle input change with debouncing
   const handleInputChange = (e) => {
     const newValue = e.target.value;
     onChange(e);
 
-    // Clear previous timer
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
 
-    // Set new debounce timer
-    const timer = setTimeout(() => {
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
       fetchSuggestions(newValue);
     }, 250);
-
-    setDebounceTimer(timer);
   };
 
   // Handle suggestion pick
   const handlePick = (suggestion) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
     saveRecentPick(queryType, country, suggestion);
     setRecentPicks([suggestion, ...recentPicks.filter(r => r.display_name !== suggestion.display_name)].slice(0, 10));
     onPick(suggestion);
@@ -126,7 +126,7 @@ export default function AutocompleteField({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setHighlightedIndex(prev => 
+        setHighlightedIndex(prev =>
           prev < allItems.length - 1 ? prev + 1 : prev
         );
         break;
@@ -179,14 +179,12 @@ export default function AutocompleteField({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
-      if (abortController) {
-        abortController.abort();
-      }
+      abortRef.current?.abort();
     };
-  }, [debounceTimer, abortController]);
+  }, []);
 
   const allItems = isOpen ? [...(recentPicks.length > 0 && value.length < 2 ? recentPicks : []), ...suggestions] : [];
   const showRecent = isOpen && value.length < 2 && recentPicks.length > 0;
@@ -306,4 +304,3 @@ export default function AutocompleteField({
     </div>
   );
 }
-

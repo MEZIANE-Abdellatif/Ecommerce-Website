@@ -84,7 +84,6 @@ export default function CheckoutAddressForm({ formData, setFormData, user }) {
 
   // Handle primary address selection
   const handleAddressSelect = async (placeId) => {
-    console.log('🔍 Address selected, place_id:', placeId);
     try {
       // Fetch place details from backend
       const response = await fetch(`${API_ENDPOINTS.GEOCODE_DETAILS}?place_id=${placeId}&lang=en`);
@@ -96,11 +95,9 @@ export default function CheckoutAddressForm({ formData, setFormData, user }) {
       }
 
       const placeDetails = await response.json();
-      console.log('📦 Raw place details from API:', placeDetails);
-      
+
       // Parse structured address
       const parsed = parsePlaceDetails(placeDetails);
-      console.log('📍 Parsed address details:', parsed);
       
       // Format postal code if needed (always PL format)
       const formattedPostalCode = parsed.postalCode 
@@ -109,24 +106,15 @@ export default function CheckoutAddressForm({ formData, setFormData, user }) {
       
       // When user selects a complete address, update ALL address fields with parsed data
       // Use parsed values if they are non-empty, otherwise keep previous values
-      setFormData(prev => {
-        const updated = {
-          ...prev,
-          // Use parsed values if they exist and are non-empty, otherwise keep previous values
-          address: parsed.street && parsed.street.trim() !== '' ? parsed.street : prev.address,
-          city: parsed.city && parsed.city.trim() !== '' ? parsed.city : prev.city,
-          postalCode: formattedPostalCode && formattedPostalCode.trim() !== '' ? formattedPostalCode : prev.postalCode,
-          state: parsed.state && parsed.state.trim() !== '' ? parsed.state : prev.state,
-          lat: parsed.lat !== null && parsed.lat !== undefined ? parsed.lat : prev.lat,
-          lon: parsed.lon !== null && parsed.lon !== undefined ? parsed.lon : prev.lon
-        };
-        console.log('🔄 Updating form data:', {
-          before: { address: prev.address, city: prev.city, postalCode: prev.postalCode },
-          after: { address: updated.address, city: updated.city, postalCode: updated.postalCode },
-          parsed: { street: parsed.street, city: parsed.city, postalCode: parsed.postalCode }
-        });
-        return updated;
-      });
+      setFormData(prev => ({
+        ...prev,
+        address: parsed.street && parsed.street.trim() !== '' ? parsed.street : prev.address,
+        city: parsed.city && parsed.city.trim() !== '' ? parsed.city : prev.city,
+        postalCode: formattedPostalCode && formattedPostalCode.trim() !== '' ? formattedPostalCode : prev.postalCode,
+        state: parsed.state && parsed.state.trim() !== '' ? parsed.state : prev.state,
+        lat: parsed.lat !== null && parsed.lat !== undefined ? parsed.lat : prev.lat,
+        lon: parsed.lon !== null && parsed.lon !== undefined ? parsed.lon : prev.lon
+      }));
     } catch (error) {
       console.error('❌ Error fetching place details:', error);
     }
