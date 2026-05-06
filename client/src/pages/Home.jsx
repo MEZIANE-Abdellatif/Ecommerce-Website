@@ -271,33 +271,11 @@ const Home = () => {
     </div>
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-rose-50">
-        <HeroCarousel />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gradient-to-r from-pink-200 to-purple-200 rounded-lg w-1/4 mb-4"></div>
-            <div className="h-4 bg-gradient-to-r from-pink-200 to-purple-200 rounded-lg w-1/2 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
-                  <div className="h-48 bg-gradient-to-br from-pink-200 to-purple-200 rounded-xl mb-4"></div>
-                  <div className="h-4 bg-gradient-to-r from-pink-200 to-purple-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gradient-to-r from-pink-200 to-purple-200 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Randomly distribute products between Best Sellers and Discounts
   const shuffledProducts = [...products].sort(() => Math.random() - 0.5);
   const bestSellers = shuffledProducts.slice(0, Math.ceil(products.length / 2));
   const discounts = shuffledProducts.slice(Math.ceil(products.length / 2));
+  const skeletonItems = [...Array(8)];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-rose-50">
@@ -348,7 +326,18 @@ const Home = () => {
 
           {/* Products Grid with Mazzinka Identity */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
-            {bestSellers.map((product, index) => renderBestSellerProduct(product, index))}
+            {loading ? (
+              skeletonItems.map((_, i) => (
+                <div key={`best-skeleton-${i}`} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg animate-pulse">
+                  <div className="h-56 bg-gradient-to-br from-pink-200 to-purple-200 rounded-xl mb-4"></div>
+                  <div className="h-5 bg-gradient-to-r from-pink-200 to-purple-200 rounded w-3/4 mb-3 mx-auto"></div>
+                  <div className="h-4 bg-gradient-to-r from-pink-200 to-purple-200 rounded w-1/2 mb-3 mx-auto"></div>
+                  <div className="h-10 bg-gradient-to-r from-pink-200 to-purple-200 rounded-xl w-full"></div>
+                </div>
+              ))
+            ) : (
+              bestSellers.map((product, index) => renderBestSellerProduct(product, index))
+            )}
           </div>
 
           {/* Creative View All Button with Mazzinka Colors */}
@@ -411,7 +400,18 @@ const Home = () => {
 
           {/* Products Grid with Mazzinka Identity */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
-            {discounts.map((product, index) => renderDiscountProduct(product, index))}
+            {loading ? (
+              skeletonItems.map((_, i) => (
+                <div key={`discount-skeleton-${i}`} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg animate-pulse">
+                  <div className="h-56 bg-gradient-to-br from-pink-200 to-purple-200 rounded-xl mb-4"></div>
+                  <div className="h-5 bg-gradient-to-r from-pink-200 to-purple-200 rounded w-3/4 mb-3 mx-auto"></div>
+                  <div className="h-4 bg-gradient-to-r from-pink-200 to-purple-200 rounded w-1/2 mb-3 mx-auto"></div>
+                  <div className="h-10 bg-gradient-to-r from-pink-200 to-purple-200 rounded-xl w-full"></div>
+                </div>
+              ))
+            ) : (
+              discounts.map((product, index) => renderDiscountProduct(product, index))
+            )}
           </div>
 
           {/* Creative View All Button with Mazzinka Colors */}
@@ -624,8 +624,12 @@ const Home = () => {
       )}
 
       {/* Version Announcement Popup */}
-      {showVersionPopup && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 animate-fade-in p-4">
+      <div
+        className={`fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-opacity duration-300 ${
+          showVersionPopup ? 'opacity-100 bg-black/60 pointer-events-auto' : 'opacity-0 bg-black/0 pointer-events-none'
+        }`}
+        aria-hidden={!showVersionPopup}
+      >
           <div className="bg-gradient-to-br from-white via-pink-50/50 to-purple-50/50 backdrop-blur-xl rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/30 animate-slide-up relative">
             {/* Simple Elegant Close Button */}
             <button
@@ -761,7 +765,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
