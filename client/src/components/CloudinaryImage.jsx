@@ -53,7 +53,7 @@ function transformCloudinaryUrl(src, width) {
   return queryString ? `${transformedUrl}?${queryString}` : transformedUrl;
 }
 
-export default function CloudinaryImage({ src, alt, width, ...imgProps }) {
+export default function CloudinaryImage({ src, alt, width, height = 'auto', ...imgProps }) {
   const transformedSrc = transformCloudinaryUrl(src, width);
-  return <img src={transformedSrc} alt={alt} {...imgProps} />;
+  return <img src={transformedSrc} alt={alt} width={width} height={height} {...imgProps} />;
 }
