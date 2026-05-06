@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from "../config/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import FavoriteButton from "../components/FavoriteButton";
+import CloudinaryImage from "../components/CloudinaryImage";
 import axios from "axios";
 
 const reviews = [
@@ -284,9 +285,10 @@ export default function ProductDetails() {
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-pink-400/20 to-rose-400/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-700"></div>
               <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/30 overflow-hidden">
-                <img
+                <CloudinaryImage
                   src={product.images?.[selectedImage] || product.image}
                   alt={product.name}
+                  width={960}
                   className="w-full h-96 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700"
                 />
                 
@@ -319,9 +321,10 @@ export default function ProductDetails() {
                     }`}
                   >
                     <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm border border-white/30 shadow-lg">
-                      <img
+                      <CloudinaryImage
                         src={image}
                         alt={`${product.name} view ${index + 1}`}
+                        width={160}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     </div>
@@ -564,9 +567,10 @@ export default function ProductDetails() {
                         {/* Mazzinka Gradient Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-purple-400/20 to-rose-400/20 z-10 group-hover:opacity-0 transition-opacity duration-500"></div>
                         
-                        <img
+                        <CloudinaryImage
                           src={relatedProduct.images?.[0] || relatedProduct.image || "https://via.placeholder.com/400x400"}
                           alt={relatedProduct.name}
+                          width={640}
                           className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                         

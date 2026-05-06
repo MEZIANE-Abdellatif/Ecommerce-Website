@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { API_ENDPOINTS } from '../config/api';
+import CloudinaryImage from './CloudinaryImage';
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -175,10 +176,12 @@ const HeroCarousel = () => {
             style={{ zIndex: index === currentSlide ? 10 : 0 }}
           >
             {/* Background Image - Clean, no overlays */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000"
-              style={{ 
-                backgroundImage: `url(${slide.image})`,
+            <CloudinaryImage
+              src={slide.image}
+              alt={`Hero slide ${index + 1}`}
+              width={1920}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000"
+              style={{
                 transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)'
               }}
             />

@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from '../config/api';
 import { Link } from 'react-router-dom';
 import HeroCarousel from '../components/HeroCarousel';
 import FavoriteButton from '../components/FavoriteButton';
+import CloudinaryImage from '../components/CloudinaryImage';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -70,9 +71,10 @@ const Home = () => {
           {/* Mazzinka Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-purple-400/20 to-rose-400/20 z-10 group-hover:opacity-0 transition-opacity duration-500"></div>
           
-          <img
+          <CloudinaryImage
             src={product.images?.[0] || product.image}
             alt={product.name}
+            width={640}
             className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
           />
           
@@ -167,9 +169,10 @@ const Home = () => {
           {/* Mazzinka Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-purple-400/20 to-rose-400/20 z-10 group-hover:opacity-0 transition-opacity duration-500"></div>
           
-          <img
+          <CloudinaryImage
             src={product.images?.[0] || product.image}
             alt={product.name}
+            width={640}
             className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
           />
           
