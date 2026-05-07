@@ -630,7 +630,7 @@ const Home = () => {
         }`}
         aria-hidden={!showVersionPopup}
       >
-          <div className="bg-gradient-to-br from-white via-pink-50/50 to-purple-50/50 backdrop-blur-xl rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/30 animate-slide-up relative">
+          <div className="bg-gradient-to-br from-white via-pink-50/50 to-purple-50/50 backdrop-blur-xl rounded-3xl p-5 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/30 animate-slide-up relative">
             {/* Simple Elegant Close Button */}
             <button
               onClick={handleCloseVersionPopup}
@@ -652,29 +652,47 @@ const Home = () => {
               </div>
             </button>
 
-            <div className="text-center pt-8">
+            <div className="text-center pt-4">
+              {/* Developer Credit */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <img
+                  src="https://res.cloudinary.com/dbock6hhb/image/upload/v1778170353/WhatsApp_Image_2026-04-05_at_05.24.06_1_ufb1hv.jpg"
+                  alt="Abdellatif Meziane profile photo"
+                  className="w-9 h-9 rounded-full object-cover border border-pink-200 shadow-sm"
+                />
+                <p className="text-xs text-gray-600">Developed by</p>
+                <a
+                  href="https://www.linkedin.com/in/abdellatif-meziane-847916219/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-bold text-pink-600 hover:text-pink-700 transition-colors duration-300"
+                >
+                  Abdellatif Meziane
+                </a>
+              </div>
+
               {/* Version Badge */}
-              <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-full mb-6 shadow-lg">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold">V0</span>
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full mb-4 shadow-lg">
+                <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold">V1.0</span>
                 </div>
-                <span className="text-lg font-bold">Mazzinka Beta Version</span>
+                <span className="text-sm sm:text-base font-bold">Mazzinka Beta</span>
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               </div>
 
               {/* Main Title */}
-              <h2 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-pink-600 via-purple-600 to-rose-600 bg-clip-text text-transparent mb-4">
-                Welcome to Mazzinka! 🎉
+              <h2 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-pink-600 via-purple-600 to-rose-600 bg-clip-text text-transparent mb-3">
+                Welcome to Mazzinka! 
               </h2>
               
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              <p className="text-base text-gray-700 mb-4 leading-relaxed">
                 You're experiencing the <span className="font-bold text-blue-600">Beta Version</span> of our beauty platform! 
                 We're continuously improving and adding <span className="font-bold text-purple-600">amazing features</span> for you.
               </p>
 
               {/* Current Features */}
-              <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-pink-200/50">
-                <h3 className="text-xl font-bold text-gray-900 mb-4"> What's Available Now</h3>
+              <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-4 mb-4 border border-pink-200/50">
+                <h3 className="text-lg font-bold text-gray-900 mb-3"> What's Available Now</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full flex items-center justify-center flex-shrink-0">
@@ -688,7 +706,7 @@ const Home = () => {
                     <div className="w-5 h-5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs font-bold">⚙️</span>
                     </div>
-                    <span className="text-gray-700">Shopping cart & checkout <span className="text-xs text-gray-500">(Stripe pending)</span></span>
+                    <span className="text-gray-700">Shopping cart & checkout</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0">
@@ -702,38 +720,14 @@ const Home = () => {
               </div>
 
               {/* Coming Soon Features */}
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-purple-200/50">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">🚀 Coming Soon</h3>
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 backdrop-blur-xl rounded-2xl p-4 mb-4 border border-purple-200/50">
+                <h3 className="text-lg font-bold text-gray-900 mb-3"> Coming Soon</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs font-bold">📦</span>
                     </div>
                     <span className="text-gray-700">Order tracking</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">🎯</span>
-                    </div>
-                    <span className="text-gray-700">AI-powered recommendations</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">💬</span>
-                    </div>
-                    <span className="text-gray-700">Live chat support</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">📱</span>
-                    </div>
-                    <span className="text-gray-700">Mobile app launch</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">⭐</span>
-                    </div>
-                    <span className="text-gray-700">Community reviews & ratings</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-gradient-to-r from-red-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
@@ -745,21 +739,17 @@ const Home = () => {
               </div>
 
               {/* Call to Action */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <p className="text-gray-600 text-sm">
                   <span className="font-medium">Stay tuned for amazing updates! </span>
-                  We're constantly improving your experience! 🚀
+                  We're constantly improving your experience! 
                 </p>
                 
                 <button
                   onClick={handleCloseVersionPopup}
-                  className="group relative inline-block"
+                  className="text-pink-600 font-bold text-lg hover:text-pink-700 transition-colors duration-300"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500"></div>
-                  <div className="relative bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 px-8 rounded-2xl font-bold text-lg shadow-xl transform group-hover:scale-105 transition-all duration-500">
-                    Start Exploring! ✨
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  </div>
+                  Start Exploring! 
                 </button>
               </div>
             </div>

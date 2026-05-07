@@ -10,7 +10,7 @@ const TabWrap = ({ children }) => (
 );
 
 export default function Profile() {
-  const ORDERS_PER_PAGE = 5;
+  const ORDERS_PER_PAGE = 3;
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
