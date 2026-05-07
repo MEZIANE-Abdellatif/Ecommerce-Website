@@ -122,11 +122,20 @@ export default function EditProfile() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[40vh]">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">Loading profile...</p>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
+        <div className="max-w-4xl mx-auto px-4 py-8 animate-pulse">
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 border border-gray-100">
+            <div className="text-center mb-6">
+              <div className="inline-block w-16 h-16 bg-gray-200 rounded-full mb-4"></div>
+              <div className="h-7 bg-gray-200 rounded max-w-[220px] mx-auto mb-3"></div>
+              <div className="h-4 bg-gray-100 rounded max-w-[260px] mx-auto"></div>
+            </div>
+            <div className="space-y-4">
+              <div className="h-10 bg-gray-100 rounded"></div>
+              <div className="h-10 bg-gray-100 rounded"></div>
+              <div className="h-10 bg-gray-100 rounded"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
           </div>
         </div>
       </div>

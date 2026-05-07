@@ -33,7 +33,7 @@ function App() {
     <CartProvider>
       <Router>
         <Navbar />
-        <Suspense fallback={<div className="p-6 text-center text-gray-600">Loading page...</div>}>
+        <Suspense fallback={<div className="min-h-screen" />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />

@@ -10,12 +10,14 @@ const TabWrap = ({ children }) => (
 );
 
 export default function Profile() {
+  const ORDERS_PER_PAGE = 5;
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [favorites, setFavorites] = useState([]);
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [currentOrdersPage, setCurrentOrdersPage] = useState(1);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalSpent: 0,
@@ -184,6 +186,23 @@ export default function Profile() {
     setSelectedOrder(null);
   };
 
+  useEffect(() => {
+    if (activeTab !== "orders") return;
+    setCurrentOrdersPage(1);
+    setSelectedOrder(null);
+  }, [activeTab, orders.length]);
+
+  const totalOrdersPages = Math.max(1, Math.ceil(orders.length / ORDERS_PER_PAGE));
+  const paginatedOrders = orders.slice(
+    (currentOrdersPage - 1) * ORDERS_PER_PAGE,
+    currentOrdersPage * ORDERS_PER_PAGE
+  );
+
+  const handleOrdersPageChange = (page) => {
+    setCurrentOrdersPage(page);
+    setSelectedOrder(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-rose-50 flex items-center justify-center">
@@ -215,27 +234,12 @@ export default function Profile() {
 
       {/* Mobile-first responsive layout */}
       <div className="relative z-10 px-4 py-6 sm:px-6 lg:px-8">
-        {/* Header - Mobile optimized */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl shadow-lg mb-4">
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-rose-600 bg-clip-text text-transparent mb-2">
-            {stats.totalOrders > 0 ? `Welcome Back, ${user.name.split(' ')[0]}!` : `Welcome, ${user.name.split(' ')[0]}!`}
-          </h1>
-          <p className="text-base sm:text-lg text-gray-600">
-            {stats.totalOrders > 0 ? 'Manage your account, orders, and preferences' : 'Complete your profile and start shopping'}
-          </p>
-        </div>
-
         {/* Mobile-first layout: Stack sidebar on top, then side-by-side on lg+ */}
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
             {/* Sidebar - Mobile: full width, Desktop: fixed width */}
             <div className="w-full lg:w-72 xl:w-80 lg:shrink-0">
-              <div className="relative">
+              <div className="relative lg:sticky lg:top-24">
                 <div className="absolute inset-0 bg-gradient-to-r from-pink-400/30 to-rose-400/30 rounded-3xl blur-2xl transform rotate-1"></div>
                 <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/30">
                   {/* Profile Info */}
@@ -428,8 +432,9 @@ export default function Profile() {
                             </button>
                           </div>
                         ) : (
-                          <div className="space-y-4">
-                            {orders.map((order) => (
+                          <>
+                            <div className="space-y-4">
+                              {paginatedOrders.map((order) => (
                               <div key={order.id}>
                                 <div className="bg-white rounded-2xl p-3 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
                                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
@@ -557,9 +562,31 @@ export default function Profile() {
                             </div>
                                   </div>
                                 )}
+                                </div>
+                              ))}
+                            </div>
+                            {totalOrdersPages > 1 && (
+                              <div className="flex items-center justify-center gap-2 pt-2">
+                                <button
+                                  onClick={() => handleOrdersPageChange(Math.max(1, currentOrdersPage - 1))}
+                                  disabled={currentOrdersPage === 1}
+                                  className="px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  Previous
+                                </button>
+                                <span className="text-sm text-gray-600 px-2">
+                                  Page {currentOrdersPage} of {totalOrdersPages}
+                                </span>
+                                <button
+                                  onClick={() => handleOrdersPageChange(Math.min(totalOrdersPages, currentOrdersPage + 1))}
+                                  disabled={currentOrdersPage === totalOrdersPages}
+                                  className="px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  Next
+                                </button>
                               </div>
-                            ))}
-                          </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </TabWrap>

@@ -8,6 +8,36 @@ import axios from "axios";
 
 const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
+function PaymentMethodSkeleton() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 relative overflow-hidden">
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-pink-200 to-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
+        <div className="absolute top-40 right-20 w-96 h-96 bg-gradient-to-r from-purple-200 to-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
+        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-gradient-to-r from-rose-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
+      </div>
+
+      <div className="relative max-w-6xl mx-auto px-4 py-8 animate-pulse">
+        <div className="text-center mb-8">
+          <div className="inline-block w-12 h-12 bg-gray-200 rounded-full mb-4" />
+          <div className="h-9 bg-gray-200 rounded-lg max-w-xs mx-auto mb-3" />
+          <div className="h-5 bg-gray-100 rounded max-w-xl mx-auto" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="h-12 bg-white/70 rounded-2xl border border-gray-100" />
+            <div className="h-56 bg-white/70 rounded-3xl border border-gray-100" />
+          </div>
+          <div className="lg:col-span-1">
+            <div className="h-96 bg-white/70 rounded-3xl border border-gray-100" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StripePaymentForm({ orderId: _orderId, onSuccess, onError }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -180,18 +210,7 @@ export default function PaymentMethod() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full mb-4 shadow-2xl">
-            <svg className="w-8 h-8 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </div>
-          <p className="text-lg text-gray-600 font-medium">Loading checkout...</p>
-        </div>
-      </div>
-    );
+    return <PaymentMethodSkeleton />;
   }
 
   const total = getCartTotal();
